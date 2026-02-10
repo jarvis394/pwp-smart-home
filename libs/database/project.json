@@ -1,0 +1,63 @@
+{
+  "name": "database",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/database/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/database",
+        "main": "libs/database/src/index.ts",
+        "tsConfig": "libs/database/tsconfig.lib.json",
+        "assets": ["libs/database/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/database/**/*.ts"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["tsc -p tsconfig.json --noEmit"],
+        "cwd": "libs/database",
+        "forwardAllArgs": false
+      }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["drizzle-kit migrate --config=drizzle.config.ts"],
+        "cwd": "libs/database"
+      }
+    },
+    "generate": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "commands": ["drizzle-kit generate --config=drizzle.config.ts"],
+        "cwd": "libs/database"
+      }
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["tsx ./src/seed.ts"],
+        "cwd": "libs/database"
+      }
+    },
+    "studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["drizzle-kit studio --config=drizzle.config.ts --port 8090"],
+        "cwd": "libs/database"
+      }
+    }
+  },
+  "tags": []
+}
