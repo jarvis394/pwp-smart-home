@@ -44,6 +44,7 @@ export const devicesRelations = relations(devices, ({ one }) => ({
   user: one(users, {
     fields: [devices.userId],
     references: [users.id],
+    relationName: 'users'
   }),
 }))
 

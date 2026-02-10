@@ -19,9 +19,9 @@ export const users = pgTable('users', {
 })
 
 export const usersRelations = relations(users, ({ many }) => ({
-  apartments: many(apartments),
-  scenarios: many(scenarios),
-  devices: many(devices),
+  apartments: many(apartments, { relationName: 'apartments' }),
+  scenarios: many(scenarios, { relationName: 'scenarios' }),
+  devices: many(devices, { relationName: 'devices' }),
 }))
 
 export type User = InferSelectModel<typeof users>

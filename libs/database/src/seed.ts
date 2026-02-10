@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { db } from './client'
-import { apartments, rooms, users, devices } from './schema'
-import { devices as MOCK_DEVICES } from '@smart-home/shared'
+import { apartments, rooms, users, devices, scenarios } from './schema'
+import * as schema from './schema'
+import {
+  DeviceCapabilityType,
+  devices as MOCK_DEVICES,
+} from '@smart-home/shared'
+import { reset } from 'drizzle-seed'
 
 async function main() {
+  await reset(db, schema)
+
   const [user] = await db
     .insert(users)
     .values({
@@ -32,6 +39,23 @@ async function main() {
     })
     .returning()
 
+  const [scenario] = await db
+    .insert(scenarios)
+    .values({
+      name: 'Toggle lights',
+      userId: user!.id,
+      isActive: false,
+      actions: {
+        [DeviceCapabilityType.ON_OFF]: {
+          type: DeviceCapabilityType.ON_OFF,
+          state: {
+            instance: 'on',
+          },
+        },
+      },
+    })
+    .returning()
+
   const insertedDevices = await db
     .insert(devices)
     .values(
@@ -39,7 +63,7 @@ async function main() {
     )
     .returning()
 
-  console.log({ user, apartment, room, devices: insertedDevices })
+  console.log({ user, apartment, room, scenario, devices: insertedDevices })
 }
 
 main().catch(async (e) => {

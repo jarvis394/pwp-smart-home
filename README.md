@@ -31,8 +31,13 @@ Look at the schemas at `libs/database/schema` and SQL init migration at `libs/da
 > [!TIP]
 > If you have Docker installed, copy the env template and use `docker compose up -d` to run preconfigured Postgres DB
 
+First, apply migrations:
 
-To seed the database, run the seed script:
+```bash
+yarn db:migrate
+```
+
+Then, to seed the database, run the seed script:
 
 ```bash
 yarn db:seed
