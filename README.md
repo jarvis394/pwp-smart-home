@@ -22,10 +22,14 @@ yarn
 Look at the schemas at `libs/database/schema` and SQL init migration at `libs/database/drizzle/0000_init.sql`.
 
 > [!IMPORTANT]
-> You need to update `.env` file with your PostgreSQL connection details to continue.
+> You need to update `.env` file with your PostgreSQL connection details to continue. Most importantly, you need to define `POSTGRES_URL`, but you can always start with copying the template:
+> ```bash
+> cat .env.template > .env
+> # Update the variables in .env if you use your own Postgres instance
+> ```
 
 > [!TIP]
-> If you have Docker installed, use `docker compose up -d` to run preconfigured postgres DB
+> If you have Docker installed, copy the env template and use `docker compose up -d` to run preconfigured Postgres DB
 
 
 To seed the database, run the seed script:
