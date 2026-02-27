@@ -7,6 +7,7 @@ import { AuthModule } from '../auth/auth.module'
 import { ConfigModule } from '../config/config.module'
 import { DevicesModule } from '../devices/devices.module'
 import { ApartmentsModule } from '../apartments/apartments.module'
+import { RoomsModule } from '../rooms/rooms.module'
 // import { DrizzleModule, DrizzleModuleOptions } from '@sixaphone/nestjs-drizzle'
 // import { type Table } from 'drizzle-orm'
 
@@ -38,6 +39,7 @@ import { ApartmentsModule } from '../apartments/apartments.module'
     DevicesModule,
     AuthModule,
     ApartmentsModule,
+    RoomsModule,
   ],
   controllers: [AppController],
 })
