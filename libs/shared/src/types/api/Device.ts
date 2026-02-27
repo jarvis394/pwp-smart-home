@@ -1,4 +1,4 @@
-import { Device } from '../Device'
+import type { Device } from '@smart-home/db'
 
 export type DevicesGetRes = {
   devices: Device[]

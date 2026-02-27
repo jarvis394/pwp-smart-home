@@ -27,8 +27,10 @@
     "strictBindCallApply": false,
     "baseUrl": ".",
     "paths": {
-      "@smart-home/shared": ["./libs/shared/src/index.ts"],
       "@smart-home/db": ["./libs/database/src/index.ts"],
+      "@smart-home/db/client": ["./libs/database/src/client.ts"],
+      "@smart-home/db/schema": ["./libs/database/src/schema/index.ts"],
+      "@smart-home/shared": ["./libs/shared/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

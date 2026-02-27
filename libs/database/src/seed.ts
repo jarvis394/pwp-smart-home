@@ -2,10 +2,8 @@
 import { db } from './client'
 import { apartments, rooms, users, devices, scenarios } from './schema'
 import * as schema from './schema'
-import {
-  DeviceCapabilityType,
-  devices as MOCK_DEVICES,
-} from '@smart-home/shared'
+import { devices as MOCK_DEVICES } from './mock/devices'
+import { DeviceCapabilityType } from './types'
 import { reset } from 'drizzle-seed'
 
 async function main() {

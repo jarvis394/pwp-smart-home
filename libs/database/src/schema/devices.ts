@@ -6,7 +6,7 @@ import {
 import { pgTable, varchar, boolean, jsonb } from 'drizzle-orm/pg-core'
 
 import { defaultId, defaultJsonbValue } from '../extend'
-import { DeviceCapabilities, DeviceState, DeviceType } from '@smart-home/shared'
+import { DeviceCapabilities, DeviceState, DeviceType } from '../types/Device'
 import { users } from './users'
 import { rooms } from './rooms'
 
@@ -44,7 +44,6 @@ export const devicesRelations = relations(devices, ({ one }) => ({
   user: one(users, {
     fields: [devices.userId],
     references: [users.id],
-    relationName: 'users'
   }),
 }))
 

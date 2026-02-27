@@ -16,12 +16,14 @@ export const users = pgTable('users', {
   password: varchar({ length: 256 }).notNull(),
   firstName: varchar({ length: 128 }).notNull(),
   lastName: varchar({ length: 128 }),
+  avatarUrl: varchar({ length: 512 }),
+  refreshToken: varchar({ length: 128 }),
 })
 
 export const usersRelations = relations(users, ({ many }) => ({
-  apartments: many(apartments, { relationName: 'apartments' }),
-  scenarios: many(scenarios, { relationName: 'scenarios' }),
-  devices: many(devices, { relationName: 'devices' }),
+  apartments: many(apartments),
+  scenarios: many(scenarios),
+  devices: many(devices),
 }))
 
 export type User = InferSelectModel<typeof users>

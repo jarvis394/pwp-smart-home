@@ -1,0 +1,45 @@
+{
+  "name": "devices",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/devices/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/devices",
+        "main": "apps/devices/src/main.ts",
+        "tsConfig": "apps/devices/tsconfig.app.json",
+        "webpackConfig": "apps/devices/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "devices:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "devices:build:development"
+        },
+        "production": {
+          "buildTarget": "devices:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": []
+}

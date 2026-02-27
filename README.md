@@ -23,6 +23,7 @@ Look at the schemas at `libs/database/schema` and SQL init migration at `libs/da
 
 > [!IMPORTANT]
 > You need to update `.env` file with your PostgreSQL connection details to continue. Most importantly, you need to define `POSTGRES_URL`, but you can always start with copying the template:
+>
 > ```bash
 > cat .env.template > .env
 > # Update the variables in .env if you use your own Postgres instance
