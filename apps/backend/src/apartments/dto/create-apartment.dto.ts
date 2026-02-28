@@ -1,9 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { isNotEmpty, IsNotEmpty, IsString } from 'class-validator'
 
 export class CreateApartmentDto {
-  @ApiProperty({ example: 'My Home' })
+  @ApiProperty({ description: 'My Home' })
+  @IsString()
+  @IsNotEmpty({ message: 'Apartment name or alias' })
   name: string
 
-  @ApiProperty({ example: 'Helsinki' })
+  @ApiProperty({ description: 'Helsinki' })
+  @IsString()
+  @IsNotEmpty({ message: 'Location is required' })
   location: string
 }
