@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common'
 import { Database, DrizzleAsyncProvider } from '../db/drizzle.module'
-import { eq } from '@smart-home/db'
+import { eq, and } from '@smart-home/db'
 import { Scenario, NewScenario, scenarios } from '@smart-home/db/schema'
 
 @Injectable()
@@ -21,9 +21,10 @@ export class ScenariosService {
     })
   }
 
-  async getById(id: string): Promise<Scenario> {
+  async getById(userId: string, id: string): Promise<Scenario> {
     const scenario = await this.db.query.scenarios.findFirst({
-      where: (fields, { eq }) => eq(fields.id, id),
+      where: (fields, { eq, and }) =>
+        and(eq(fields.id, id), eq(fields.userId, userId)),
     })
 
     if (!scenario) throw new NotFoundException('Scenario not found')
@@ -58,8 +59,8 @@ export class ScenariosService {
     return result
   }
 
-  async toggleActive(id: string): Promise<Scenario> {
-    const scenario = await this.getById(id)
+  async toggleActive(userId: string, id: string): Promise<Scenario> {
+    const scenario = await this.getById(userId, id)
 
     const [result] = await this.db
       .update(scenarios)

@@ -48,14 +48,18 @@ export class ApartmentsController {
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   @ApiBearerAuth()
-  async update(@Param('id') id: string, @Body() body: UpdateApartmentDto) {
-    return await this.apartmentsService.update(id, body)
+  async update(
+    @Request() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() body: UpdateApartmentDto
+  ) {
+    return await this.apartmentsService.update(req.user.userId, id, body)
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiBearerAuth()
-  async delete(@Param('id') id: string) {
-    return await this.apartmentsService.delete(id)
+  async delete(@Request() req: RequestWithUser, @Param('id') id: string) {
+    return await this.apartmentsService.delete(req.user.userId, id)
   }
 }

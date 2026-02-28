@@ -31,8 +31,8 @@ export class ScenariosController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiBearerAuth()
-  async getById(@Param('id') id: string) {
-    return await this.scenariosService.getById(id)
+  async getById(@Request() req: RequestWithUser, @Param('id') id: string) {
+    return await this.scenariosService.getById(req.user.userId, id)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -45,7 +45,7 @@ export class ScenariosController {
     return await this.scenariosService.create(req.user.userId, body)
   }
 
-  @UseGuards()
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   @ApiBearerAuth()
   async update(@Param('id') id: string, @Body() body: UpdateScenarioDto) {
@@ -55,8 +55,8 @@ export class ScenariosController {
   @UseGuards(JwtAuthGuard)
   @Get(':id/toggle')
   @ApiBearerAuth()
-  async toggleactive(@Param('id') id: string) {
-    return await this.scenariosService.toggleActive(id)
+  async toggleActive(@Request() req: RequestWithUser, @Param('id') id: string) {
+    return await this.scenariosService.toggleActive(req.user.userId, id)
   }
 
   @UseGuards(JwtAuthGuard)

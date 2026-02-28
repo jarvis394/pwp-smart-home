@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common'
 import { Database, DrizzleAsyncProvider } from '../db/drizzle.module'
-import { eq } from '@smart-home/db'
+import { eq, and } from '@smart-home/db'
 import { Apartment, NewApartment, apartments } from '@smart-home/db/schema'
 
 @Injectable()
@@ -45,23 +45,24 @@ export class ApartmentsService {
   }
 
   async update(
+    userId: string,
     id: string,
     data: Partial<Omit<NewApartment, 'userId'>>
   ): Promise<Apartment> {
     const [result] = await this.db
       .update(apartments)
       .set(data)
-      .where(eq(apartments.id, id))
+      .where(and(eq(apartments.id, id), eq(apartments.userId, userId)))
       .returning()
 
     if (!result) throw new InternalServerErrorException('Apartment not found')
     return result
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(userId: string, id: string): Promise<boolean> {
     const [result] = await this.db
       .delete(apartments)
-      .where(eq(apartments.id, id))
+      .where(and(eq(apartments.id, id), eq(apartments.userId, userId)))
       .returning()
 
     if (!result) throw new NotFoundException('Apartment not found')
