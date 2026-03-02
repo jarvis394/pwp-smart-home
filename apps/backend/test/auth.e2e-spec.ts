@@ -2,8 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import request from 'supertest'
 import { AppModule } from '../src/app/app.module'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { DrizzleAsyncProvider, Database } from '../src/db/drizzle.module'
+import { users } from '@smart-home/db/schema'
+import { eq } from '@smart-home/db'
 
-describe('Devices (e2e)', () => {
+describe('Auth (e2e)', () => {
   let app: INestApplication
   let accessToken: string
   let refreshToken: string
@@ -19,13 +23,16 @@ describe('Devices (e2e)', () => {
     app.setGlobalPrefix('api')
     app.useGlobalPipes(new ValidationPipe())
     await app.init()
+
+    const db = app.get<Database>(DrizzleAsyncProvider)
+    await db.delete(users).where(eq(users.email, 'authtest@test.com'))
   })
 
   it('POST /api/auth/register - 201: valid register', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/auth/register')
       .send({
-        email: 'authtest_new@test.com',
+        email: 'authtest@test.com',
         password: 'authtest123',
         firstName: 'Auth',
         lastName: 'Test',
@@ -34,7 +41,7 @@ describe('Devices (e2e)', () => {
     expect(res.status).toBe(201)
     expect(res.body).toHaveProperty('tokens')
     expect(res.body).toHaveProperty('user')
-    expect(res.body.user.email).toBe('authtest_new@test.com')
+    expect(res.body.user.email).toBe('authtest@test.com')
   })
 
   it('POST /api/auth/register - 400: invalid email', async () => {
@@ -130,6 +137,19 @@ describe('Devices (e2e)', () => {
   })
 
   afterAll(async () => {
+    const cacheManager = app.get(CACHE_MANAGER)
+    const stores = cacheManager.stores || [cacheManager.store]
+    for await (const store of stores) {
+      if (store?.client?.flushall) {
+        await store.client.flushall()
+      } else if (store?.clear) {
+        await store.clear()
+      }
+    }
+
+    const db = app.get<Database>(DrizzleAsyncProvider)
+    await db.delete(users).where(eq(users.email, 'authtest@test.com'))
+
     await app.close()
   })
 })

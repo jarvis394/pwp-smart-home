@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import request from 'supertest'
 import { AppModule } from '../src/app/app.module'
+import { of } from 'rxjs'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
 
 describe('Devices (e2e)', () => {
   let app: INestApplication
@@ -12,7 +14,20 @@ describe('Devices (e2e)', () => {
     //For unit tests, the method used is compile(), which is asynchronous.
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile()
+    })
+      .overrideProvider('DEVICES_SERVICE')
+      .useValue({
+        send: jest.fn().mockImplementation((pattern) => {
+          if (pattern.cmd === 'getDevices') {
+            return of({ devices: [{ id: 'mock-1', name: 'Mock Device' }] })
+          }
+          if (pattern.cmd === 'getFavoriteDevices') {
+            return of({ devices: [{ id: 'mock-1', name: 'Mock Device' }] })
+          }
+          return of({})
+        }),
+      })
+      .compile()
 
     //Nest is used to emulate HTTP request in e2e testing by using Supertest library
     app = moduleFixture.createNestApplication()
@@ -66,6 +81,15 @@ describe('Devices (e2e)', () => {
   })
 
   afterAll(async () => {
+    const cacheManager = app.get(CACHE_MANAGER)
+    const stores = cacheManager.stores || [cacheManager.store]
+    for await (const store of stores) {
+      if (store?.client?.flushall) {
+        await store.client.flushall()
+      } else if (store?.clear) {
+        await store.clear()
+      }
+    }
     await app.close()
   })
 })

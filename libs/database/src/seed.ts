@@ -11,12 +11,24 @@ async function main() {
 
   const [user] = await db
     .insert(users)
-    .values({
-      email: 'hello@yekushev.dev',
-      firstName: 'Vladislav',
-      lastName: 'Ekushev',
-      password: 'qwerty',
-    })
+    .values([
+      {
+        email: 'hello@yekushev.dev',
+        firstName: 'Vladislav',
+        lastName: 'Ekushev',
+        // hashed 'qwerty'
+        password:
+          '$2a$12$ep7KSW1nL5G1YgCd2vzrLOjNydGLGmlA3zO1/cB29sJ9UkxlMHu0S',
+      },
+      {
+        email: 'dl3@test.com',
+        firstName: 'Test',
+        lastName: 'User',
+        // hashed 'dl3test123'
+        password:
+          '$2a$12$6WPamy8nJUlVnJXnjKFdWeGpYIhfTKqqSDYTgWjbt2nrYtJpAq3by', // hashed 'dl3test123'
+      },
+    ])
     .returning()
 
   const [apartment] = await db

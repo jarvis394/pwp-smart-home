@@ -16,6 +16,7 @@
     "db:migrate": "yarn nx run database:migrate",
     "db:seed": "yarn nx run database:seed",
     "db:studio": "yarn nx run database:studio",
+    "test": "yarn nx run-many -t test",
     "prepare": "husky install"
   },
   "private": true,
@@ -110,7 +111,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.14",
     "@types/express": "4.17.21",
-    "@types/jest": "^29.4.0",
+    "@types/jest": "^30.0.0",
     "@types/multer": "^1.4.11",
     "@types/node": "18.16.9",
     "@types/passport-jwt": "^4.0.0",
