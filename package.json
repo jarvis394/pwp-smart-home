@@ -84,7 +84,7 @@
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.1",
-    "@nestjs/testing": "^11.1.14",
+    "@nestjs/testing": "^10.0.2",
     "@nx/esbuild": "17.2.8",
     "@nx/eslint-plugin": "17.2.8",
     "@nx/express": "^17.2.8",

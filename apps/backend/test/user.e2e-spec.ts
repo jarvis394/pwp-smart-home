@@ -80,7 +80,7 @@ describe('User (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .attach('file', wrongFilebuffer, {
         filename: 'not-an-image.txt',
-        contentType: 'text/pplain',
+        contentType: 'text/plain',
       })
 
     expect(res.status).toBe(400)
