@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common'
+import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app/app.module'
 import { ConfigService } from './config/config.service'
@@ -12,6 +12,7 @@ async function bootstrap() {
   const globalPrefix = 'api'
 
   app.setGlobalPrefix(globalPrefix)
+  app.useGlobalPipes(new ValidationPipe())
   app.useStaticAssets(config.UPLOADS_PATH, {
     index: false,
     prefix: `/${globalPrefix}/uploads/`,

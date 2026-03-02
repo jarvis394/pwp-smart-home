@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common'
 import { Database, DrizzleAsyncProvider } from '../db/drizzle.module'
-import { eq, and } from '@smart-home/db'
+import { eq } from '@smart-home/db'
 import { Scenario, NewScenario, scenarios } from '@smart-home/db/schema'
 
 @Injectable()
