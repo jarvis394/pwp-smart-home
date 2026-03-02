@@ -131,10 +131,6 @@ describe('Scenarios (e2e)', () => {
   })
 
   afterAll(async () => {
-    await request(app.getHttpServer())
-      .delete(`/api/scenarios/${scenarioId}`)
-      .set('Authorization', `Bearer ${token}`)
-
     await app.close()
   })
 })
