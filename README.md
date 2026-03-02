@@ -50,6 +50,43 @@ To view database structure and seed data, run Drizzle Studio:
 yarn db:studio
 ```
 
+## Testing
+
+Before running the tests, make sure to seed the database and keep open:
+
+1. Docker
+2. Swagger (yarn dev opens Swagger on localhost:5000)
+
+### Test Instructions
+
+1. Use `POST /api/auth/register` with this specific user (seed in the testing application):
+```json
+{
+  "email": "dl3@test.com",
+  "password": "dl3test123",
+  "firstName": "Test",
+  "lastName": "User"
+}
+```
+
+2. Run the test with the following command:
+
+```bash
+npx nx test backend
+```
+
+For running tests with coverage, use
+
+```bash
+npx nx test backend --coverage
+```
+
+3. A coverage test report will be generated at `apps/backend/coverage/index.html`
+
+[NOTE!]
+Testing was kept simple in the Devices module. This is because the RabbitMQ message broker uses a ClientProxy to communicate with the Device module, and it will require a RabbitMQ instance and separate Device microservice to be simultaneously active during tests. Authentication was still verified in all device endpoints.
+
+
 ### Dependencies
 
 - Drizzle ORM
