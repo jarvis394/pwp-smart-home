@@ -3,10 +3,11 @@ import { INestApplication, ValidationPipe } from '@nestjs/common'
 import request from 'supertest'
 import { AppModule } from '../src/app/app.module'
 
-describe('Apartments (e2e)', () => {
+describe('Rooms (e2e)', () => {
   let app: INestApplication
   let token: string
   let apartmentId: string
+  let roomId: string
 
   beforeAll(async () => {
     //createTestingModule() method takes module metadats and returns a Testing Module instance
@@ -26,98 +27,110 @@ describe('Apartments (e2e)', () => {
       .send({ email: 'dl3@test.com', password: 'dl3test123' })
 
     token = res.body.tokens.accessToken
-  })
 
-  it('POST /api/apartments - 201: valid request', async () => {
-    const res = await request(app.getHttpServer())
+    const apartment = await request(app.getHttpServer())
       .post('/api/apartments')
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Test Home', location: 'Helsinki' })
+      .send({ name: 'Test Apartment', location: 'Helsinki' })
 
-    expect(res.status).toBe(201)
-    expect(res.body.name).toBe('Test Home')
-    expect(res.body.location).toBe('Helsinki')
-
-    //May need ID for later testing
-    apartmentId = res.body.id
+    apartmentId = apartment.body.id
   })
 
-  it('POST /api/apartments - 401: unauthorized', async () => {
+  it('POST /api/rooms - 201: valid request', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/apartments')
-      .send({ name: 'Test Home', location: 'Helsinki' })
+      .post('/api/rooms')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Living Room', location: 'First floor', apartmentId })
+
+    expect(res.status).toBe(201)
+    expect(res.body.name).toBe('Living Room')
+    expect(res.body.apartmentId).toBe(apartmentId)
+
+    roomId = res.body.id
+  })
+
+  it('POST /api/rooms - 401: unauthorized', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/rooms')
+      .send({ name: 'Living Room', location: 'First Floor', apartmentId })
 
     expect(res.status).toBe(401)
   })
 
-  it('POST /api/apartments -   400: invalid request', async () => {
+  it('POST /api/rooms -   400: invalid request', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/apartments')
+      .post('/api/rooms')
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Test Home' })
+      .send({ name: 'Living Room' })
 
     expect(res.status).toBe(400)
   })
 
-  it('GET /api/apartments - 200: return list', async () => {
+  it('GET /api/rooms/apartment/:apartmentId - 200: return list', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/apartments')
+      .get(`/api/rooms/apartment/${apartmentId}`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
     expect(Array.isArray(res.body)).toBe(true)
   })
 
-  it('GET /api/apartments - 401: unauthorized', async () => {
-    const res = await request(app.getHttpServer()).get('/api/apartments')
+  it('GET /api/rooms/apartment/:apartmentId - 401: unauthorized', async () => {
+    const res = await request(app.getHttpServer()).get(
+      `/api/rooms/apartment/${apartmentId}`
+    )
 
     expect(res.status).toBe(401)
   })
 
-  it('GET /api/apartments:id - 200: single apartment', async () => {
+  it('GET /api/rooms:id - 200: single room', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/api/apartments/${apartmentId}`)
+      .get(`/api/rooms/${roomId}`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
-    expect(res.body.id).toBe(apartmentId)
+    expect(res.body.id).toBe(roomId)
   })
 
-  it('GET /api/apartments:id - 404: invalid id', async () => {
+  it('GET /api/rooms:id - 404: invalid id', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/apartments/invalid-uuid')
+      .get('/api/rooms/invalid-uuid')
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(404)
   })
 
-  it('PUT /api/apartments:id - 200: update apartment', async () => {
+  it('PUT /api/rooms:id - 200: update room', async () => {
     const res = await request(app.getHttpServer())
-      .put(`/api/apartments/${apartmentId}`)
+      .put(`/api/rooms/${roomId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Updated Home' })
+      .send({ name: 'Updated Room' })
 
     expect(res.status).toBe(200)
-    expect(res.body.name).toBe('Updated Home')
+    expect(res.body.name).toBe('Updated Room')
   })
 
-  it('DELETE /api/apartments:id - 200: apartment deleted', async () => {
+  it('DELETE /api/rooms:id - 200: room deleted', async () => {
     const res = await request(app.getHttpServer())
-      .delete(`/api/apartments/${apartmentId}`)
+      .delete(`/api/rooms/${roomId}`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
   })
 
-  it('GET /api/apartments:id - 404: apartment not found after deleted', async () => {
+  it('GET /api/rooms:id - 404: room not found after deleted', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/api/apartments/${apartmentId}`)
+      .get(`/api/rooms/${roomId}`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(404)
   })
 
   afterAll(async () => {
+    await request(app.getHttpServer())
+      .delete(`/api/apartments/${apartmentId}`)
+      .set('Authorization', `Bearer ${token}`)
+
     await app.close()
   })
 })
