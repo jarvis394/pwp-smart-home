@@ -6,6 +6,7 @@ import path from 'path'
 type EnvSchema = {
   PORT: string
   POSTGRES_URL: string
+  REDIS_URL: string
   JWT_KEY: string
   JWT_ACCESS_TOKEN_TTL: string
   JWT_REFRESH_TOKEN_TTL: string
@@ -22,6 +23,15 @@ export class ConfigService {
 
   get POSTGRES_URL() {
     return this.configService.getOrThrow('POSTGRES_URL')
+  }
+
+  /**
+   * Redis URL for caching
+   *
+   * If not provided, keyv will use in-memory storage
+   */
+  get REDIS_URL() {
+    return this.configService.get('REDIS_URL')
   }
 
   get RABBITMQ_URL() {

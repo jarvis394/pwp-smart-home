@@ -85,15 +85,19 @@ export class DevicesService {
         where: (fields, { eq, and }) =>
           and(eq(fields.id, deviceId), eq(fields.userId, userId)),
       })
+
+      if (!device) return []
+
       return await tx
         .update(devices)
         .set({
-          favorite: !device?.favorite,
+          favorite: !device.favorite,
         })
+        .where(and(eq(devices.id, deviceId), eq(devices.userId, userId)))
         .returning()
     })
 
-    return !result?.favorite || false
+    return result?.favorite ?? false
   }
 
   async toggleOnOff(
