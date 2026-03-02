@@ -72,13 +72,13 @@ Before running the tests, make sure to seed the database and keep open:
 2. Run the test with the following command:
 
 ```bash
-npx nx test backend
+yarn test
 ```
 
 For running tests with coverage, use
 
 ```bash
-npx nx test backend --coverage
+yarn test --coverage
 ```
 
 3. A coverage test report will be generated at `apps/backend/coverage/index.html`

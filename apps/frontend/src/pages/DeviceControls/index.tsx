@@ -78,7 +78,6 @@ const DeviceControls: React.FC = () => {
   const device = useMemo(() => {
     return devices?.devices.find((e) => e.id === id)
   }, [devices?.devices, id])
-  const [isFavorite, setIsFavorite] = useState(device?.favorite || false)
 
   const supportsColorSettings =
     device &&
@@ -93,10 +92,6 @@ const DeviceControls: React.FC = () => {
     if (!id) return
 
     favoriteToggle({ id })
-      .unwrap()
-      .then((data) => {
-        setIsFavorite(data.state)
-      })
   }
 
   const handleDeleteDevice = () => {
@@ -126,7 +121,7 @@ const DeviceControls: React.FC = () => {
     if (!device && isSuccess) {
       navigate(getRouteByAlias('devices').path)
     }
-  })
+  }, [device, isSuccess, navigate])
 
   if (!device) {
     return <FullScreenSpinner />
@@ -142,7 +137,7 @@ const DeviceControls: React.FC = () => {
               <DeleteOutlined />
             </IconButton>
             <IconButton onClick={toggleFavoriteDevice}>
-              {isFavorite ? <Favorite /> : <FavoriteBorder />}
+              {device.favorite ? <Favorite /> : <FavoriteBorder />}
             </IconButton>
           </>
         }

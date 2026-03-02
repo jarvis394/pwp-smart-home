@@ -10,7 +10,10 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  Inject,
 } from '@nestjs/common'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { Cache } from 'cache-manager'
 import { UserService } from './user.service'
 import {
   UserGetSelfRes,
@@ -21,24 +24,33 @@ import {
 import { RequestWithUser } from '../auth/auth.controller'
 import { JwtAuthGuard } from '../auth/strategies/jwt.strategy'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ConfigService } from '../config/config.service'
-import 'multer'
 import { ApiTags, ApiBody, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger'
 import AvatarUploadDto from './dto/avatar-upload.dto'
+import 'multer'
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly configService: ConfigService
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
   @ApiBearerAuth()
   async getSelf(@Request() req: RequestWithUser): Promise<UserGetSelfRes> {
-    return await this.userService.getSelf(req.user.userId)
+    const cacheKey = UserController.getSelfCacheKey(req.user.userId)
+    const cached = await this.cacheManager.get<UserGetSelfRes>(cacheKey)
+
+    if (cached) {
+      return cached
+    }
+
+    const result = await this.userService.getSelf(req.user.userId)
+    await this.cacheManager.set(cacheKey, result)
+
+    return result
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,7 +60,10 @@ export class UserController {
     @Request() req: RequestWithUser,
     @Body() update: UserUpdateReq
   ): Promise<UserUpdateRes> {
-    return await this.userService.updateInfo(req.user.userId, update)
+    const result = await this.userService.updateInfo(req.user.userId, update)
+    const cacheKey = UserController.getSelfCacheKey(req.user.userId)
+    await this.cacheManager.del(cacheKey)
+    return result
   }
 
   @UseGuards(JwtAuthGuard)
@@ -75,6 +90,13 @@ export class UserController {
     )
     file: Express.Multer.File
   ): Promise<UserUploadAvatarRes> {
-    return await this.userService.updateAvatar(req.user.userId, file)
+    const result = await this.userService.updateAvatar(req.user.userId, file)
+    const cacheKey = UserController.getSelfCacheKey(req.user.userId)
+    await this.cacheManager.del(cacheKey)
+    return result
+  }
+
+  public static getSelfCacheKey(userId: string): string {
+    return `user-${userId}`
   }
 }

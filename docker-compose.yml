@@ -1,7 +1,14 @@
 services:
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
   db:
     image: postgres:latest
-    container_name: db
     restart: always
     env_file:
       - .env
@@ -15,7 +22,6 @@ services:
       - postgres_data:/var/lib/postgresql
 
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:3-management
     ports:
       - '5672:5672'
@@ -23,3 +29,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
