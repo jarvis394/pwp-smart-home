@@ -16,7 +16,7 @@ import {
 } from './strategies/jwtRefreshToken.strategy'
 import { JwtAuthGuard } from './strategies/jwt.strategy'
 import { UserLoginRes, UserRegisterRes } from '@smart-home/shared'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { LoginDto } from './dto/login.dto'
 
 export interface RequestWithUser extends Request {
@@ -33,6 +33,9 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @ApiOperation({ description: 'User logs into the application' })
+  @ApiResponse({ status: 201, description: 'Login Successfull' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - wrong email or password' })
   async login(
     @Request() req: RequestWithUser,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,12 +45,20 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get('logout')
+  @ApiOperation({ description: 'User logs out of the application' })
+  @ApiResponse({ status: 200, description: 'User logged out successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized request - invalid token' })
   async logout(@Request() req: RequestWithUser) {
     return await this.authService.logout(req.user.userId)
   }
 
   @Post('register')
+  @ApiOperation({ description: 'Registers a new user' })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid email format' })
+  @ApiResponse({ status: 409, description: 'Email already in use' })
   async register(
     @Body() { email, firstName, lastName, password, avatarUrl }: RegisterDto
   ): Promise<UserRegisterRes> {
@@ -62,6 +73,9 @@ export class AuthController {
 
   @UseGuards(JwtRefreshTokenAuthGuard)
   @Get('refresh')
+  @ApiOperation({ description: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 400, description: 'Unauthorized - Refresh token expired or invalid' })
   async refreshTokens(@Req() req: RequestWithJwtPayload) {
     const userId = req.user.sub
     const refreshToken = req.user.refreshToken

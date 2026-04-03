@@ -24,7 +24,7 @@ import {
 import { RequestWithUser } from '../auth/auth.controller'
 import { JwtAuthGuard } from '../auth/strategies/jwt.strategy'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiTags, ApiBody, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger'
+import { ApiTags, ApiResponse, ApiBody, ApiConsumes, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import AvatarUploadDto from './dto/avatar-upload.dto'
 import 'multer'
 
@@ -39,6 +39,9 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get()
   @ApiBearerAuth()
+  @ApiOperation({ description: 'Fetches user profile information' })
+  @ApiResponse({ status: 200, description:'User profile fetched successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid or missing token' })
   async getSelf(@Request() req: RequestWithUser): Promise<UserGetSelfRes> {
     const cacheKey = UserController.getSelfCacheKey(req.user.userId)
     const cached = await this.cacheManager.get<UserGetSelfRes>(cacheKey)
@@ -56,6 +59,10 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Post('update')
   @ApiBearerAuth()
+  @ApiOperation({ description: 'Updates the information of the user authenticated' })
+  @ApiResponse({ status: 200, description:'User updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - empty fields' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - token missing or invalid' })
   async updateInfo(
     @Request() req: RequestWithUser,
     @Body() update: UserUpdateReq
@@ -75,6 +82,10 @@ export class UserController {
     description: 'Avatar file in "file" field',
     type: AvatarUploadDto,
   })
+  @ApiOperation({ description: 'Uploads an image file (.png, .jpeg, .webp) as an avatar' })
+  @ApiResponse({ status: 201, description:'Avatar uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid type or large file' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid or missing token' })
   async uploadAvatar(
     @Request() req: RequestWithUser,
     @UploadedFile(
