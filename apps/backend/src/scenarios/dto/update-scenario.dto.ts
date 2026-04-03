@@ -1,14 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsObject, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsObject, IsOptional, IsString } from 'class-validator'
 
 export class UpdateScenarioDto {
-  @ApiProperty({ example: 'Morning Routine', required: false })
+  @ApiProperty({
+    description: 'Updated name of scenario',
+    example: 'Morning Routine',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   name?: string
 
-  @ApiProperty({ example: [], required: false })
-  @IsObject()
+  @ApiProperty({
+    description: 'Updated list of actions for this scenario',
+    type: 'array',
+    items: { type: 'obhject' },
+    example: [
+      {
+        deviceId: '550e8400-e29b-41d4-a716-446655440000',
+        lightIntensity: 'dim',
+      },
+    ],
+    required: false,
+  })
+  @IsArray()
   @IsOptional()
-  actions?: object
+  actions?: object[]
 }

@@ -10,7 +10,13 @@ import {
 } from '@nestjs/common'
 import { RoomsService } from './rooms.service'
 import { JwtAuthGuard } from '../auth/strategies/jwt.strategy'
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+} from '@nestjs/swagger'
 import { Room } from './dto/room-response-dto'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { UpdateRoomDto } from './dto/update-room.dto'
@@ -23,9 +29,17 @@ export class RoomsController {
   @UseGuards(JwtAuthGuard)
   @Get('apartment/:apartmentId')
   @ApiBearerAuth()
-  @ApiOperation({ description: 'Get all rooms in one apartment' })
-  @ApiParam({ name: 'apartmentId', type: 'string', format: 'uuid', })
-  @ApiResponse({ status: 200, description: 'List of rooms fetched successfully', type: Room, isArray: true })
+  @ApiOperation({
+    summary: 'Get all rooms in one apartment',
+    description: 'Get all rooms in one apartment',
+  })
+  @ApiParam({ name: 'apartmentId', type: 'string', format: 'uuid' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of rooms fetched successfully',
+    type: Room,
+    isArray: true,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Apartment not found' })
   async getRooms(@Param('apartmentId') apartmentId: string) {
@@ -35,9 +49,17 @@ export class RoomsController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiBearerAuth()
-  @ApiOperation({ description: 'Gets a single room by ID' })
+  @ApiOperation({
+    summary: 'Gets a single room by ID',
+    description: 'Gets a single room by ID',
+  })
   @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Rooms fetched successfully', type: Room, isArray: true })
+  @ApiResponse({
+    status: 200,
+    description: 'Rooms fetched successfully',
+    type: Room,
+    isArray: true,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Room not registered' })
   async getById(@Param('id') id: string) {
@@ -47,7 +69,10 @@ export class RoomsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiBearerAuth()
-  @ApiOperation({ description: 'Creates a new room in an apartment' })
+  @ApiOperation({
+    summary: 'Creates a new room',
+    description: 'Creates a new room in an apartment',
+  })
   @ApiResponse({ status: 200, description: 'Room created successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request - missing fields' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -58,8 +83,14 @@ export class RoomsController {
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   @ApiBearerAuth()
-  @ApiOperation({ description: 'Updates the details of a room' })
-  @ApiResponse({ status: 200, description: 'Room details updated successfully' })
+  @ApiOperation({
+    summary: 'Update room details',
+    description: 'Updates the details of a room',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Room details updated successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Room not registered' })
   async update(@Param('id') id: string, @Body() body: UpdateRoomDto) {
@@ -69,7 +100,10 @@ export class RoomsController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiBearerAuth()
-  @ApiOperation({ description: 'Deletes a room by ID' })
+  @ApiOperation({
+    summary: 'Deletes a room',
+    description: 'Deletes a room by ID',
+  })
   @ApiResponse({ status: 200, description: 'Room deleted successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Room not registered' })
