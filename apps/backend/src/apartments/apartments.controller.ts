@@ -13,7 +13,13 @@ import {
 import { ApartmentsService } from './apartments.service'
 import { JwtAuthGuard } from '../auth/strategies/jwt.strategy'
 import { RequestWithUser } from '../auth/auth.controller'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger'
+import { Apartment } from './dto/apartment-response-dto'
 import { CreateApartmentDto } from './dto/create-apartment.dto'
 import { UpdateApartmentDto } from './dto/update-apartment.dto'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
@@ -30,6 +36,17 @@ export class ApartmentsController {
   @UseGuards(JwtAuthGuard)
   @Get()
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List all apartments',
+    description: 'List of all apartments owned by user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Apartment list fetched successfully',
+    type: Apartment,
+    isArray: true,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getApartments(@Request() req: RequestWithUser) {
     const cacheKey = ApartmentsController.getApartmentsCacheKey(req.user.userId)
     const cached = await this.cacheManager.get(cacheKey)
@@ -45,6 +62,18 @@ export class ApartmentsController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
+  @ApiOperation({
+    summary: 'Gets an apartment by ID',
+    description: 'Gets an apartment by ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Apartment fetched successfully',
+    type: Apartment,
+    isArray: true,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Apartment not registered' })
   @ApiBearerAuth()
   async getById(@Request() req: RequestWithUser, @Param('id') id: string) {
     return await this.apartmentsService.getById(req.user.userId, id)
@@ -53,6 +82,16 @@ export class ApartmentsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Creates a new apartment',
+    description: 'Creates a new apartment',
+  })
+  @ApiResponse({ status: 201, description: 'Apartment created successfully' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - some fields are missing',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async create(
     @Request() req: RequestWithUser,
     @Body() body: CreateApartmentDto
@@ -66,6 +105,13 @@ export class ApartmentsController {
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Updates apartment details',
+    description: 'Updates the details of an apartment',
+  })
+  @ApiResponse({ status: 200, description: 'Apartment updated successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Apartment not registered' })
   async update(
     @Request() req: RequestWithUser,
     @Param('id') id: string,
@@ -84,6 +130,13 @@ export class ApartmentsController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Deletes an apartment',
+    description: 'Deletes an apartment',
+  })
+  @ApiResponse({ status: 200, description: 'Apartment deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Apartment not registered' })
   async delete(@Request() req: RequestWithUser, @Param('id') id: string) {
     const result = await this.apartmentsService.delete(req.user.userId, id)
     const cacheKey = ApartmentsController.getApartmentsCacheKey(req.user.userId)

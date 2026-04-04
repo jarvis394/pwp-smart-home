@@ -1,0 +1,899 @@
+---
+openapi: 3.0.4
+info:
+  title: Smart Home API
+  version: 1.0.0
+  description: API for managing Smart Home devices.
+servers:
+  - url: /api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email
+          example: "dl3@test.com"
+        password:
+          type: string
+          description: User password
+          example: "dl3test123"
+    RegisterDto:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email
+          example: "dl3@test.com"
+        password:
+          type: string
+          description: User password
+          example: "dl3test123"
+        firstName:
+          type: string
+          description: User first name
+          example: "John"
+        lastName:
+          type: string
+          description: User last name
+          example: "Doe"
+        avatarUrl:
+          type: string
+          description: URL of the user's avatar image
+          example: "http://example.com/avatar.png"
+    AvatarUploadDto:
+      type: object
+      properties:
+        file:
+          type: string
+          description: Image file to upload
+    AuthResponse:
+      type: object
+      properties:
+        tokens:
+          type: object
+          properties:
+            accessToken:
+              type: string
+              example: "eyJhbG..."
+            refreshToken:
+              type: string
+              example: "eyJhbG..."
+    UserUpdateDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "newemail@test.com"
+        firstName:
+          type: string
+          example: "Jane"
+        lastName:
+          type: string
+          example: "Smith"
+        avatarUrl:
+          type: string
+          example: "http://example.com/new-avatar.png"
+        password:
+          type: string
+          example: "newPassword123"
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "Kitchen Light"
+        type:
+          type: string
+          example: "Light"
+        favorite:
+          type: boolean
+          example: false
+    CreateDeviceReq:
+      type: object
+      required: [name, type, apartmentId]
+      properties:
+        name:
+          type: string
+          example: "Kitchen Light"
+        model:
+          type: string
+          example: "Xiaomi TL-45"
+        type:
+          type: string
+          example: "Light"
+        apartmentId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    Apartment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "My Home"
+        location:
+          type: string
+          example: "Oulu"
+    CreateApartmentDto:
+      type: object
+      required: [name, location]
+      properties:
+        name:
+          type: string
+          example: "My Home"
+        location:
+          type: string
+          example: "Oulu"
+    UpdateApartmentDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "New Home"
+        location:
+          type: string
+          example: "Helsinki"
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "Living Room"
+        location:
+          type: "string"
+          example: "First floor"
+        apartmentId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    CreateRoomDto:
+      type: object
+      required: [name, location, apartmentId]
+      properties:
+        name:
+          type: string
+          example: "Kitchen"
+        location:
+          type: string
+          example: "Basement"
+        apartmentId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    UpdateRoomDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Master Bedroom"
+        location:
+          type: string
+          example: "Second Floor"
+    Scenario:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Morning Routine"
+        isActive:
+          type: boolean
+          example: true
+        actions:
+          type: array
+          items:
+            type: object
+          description: Actions to be performed in this scenario
+          example: [{ "deviceId": "550e8400-e29b-41d4-a716-446655440000", "lightIntensity": "bright" }]
+    CreateScenarioDto:
+      type: object
+      required: [name, actions]
+      properties:
+        name:
+          type: string
+          example: "Movie Night"
+        actions:
+          type: array
+          items:
+            type: object
+          description: Actions to be performed in this scenario
+          example: [{ "deviceId": "550e8400-e29b-41d4-a716-446655440000", "lightIntensity": "dim"}]
+    UpdateScenarioDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Morning Routine"
+        actions:
+          type: array
+          items:
+            type: object
+          example: [{ "deviceId": "550e8400-e29b-41d4-a716-446655440000", "lightIntensity": "dim"}]
+paths:
+  /auth/login/:
+    post:
+      tags:
+        - auth
+      summary: User login
+      description: User logs into the application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '201':
+          description: Login successfull
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Unauthorized - wrong email or password
+  /auth/register/:
+    post:
+      tags:
+        - auth
+      summary: User registration
+      description: Registers a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Bad request - invalid email format
+        '409':
+          description: Email already in use
+  /auth/logout/:
+    get:
+      tags:
+        - auth
+      summary: User logout
+      description: User logs out of the application
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User logged out successfully
+        '401':
+          description: Unauthorized request - invalid token
+  /auth/refresh/:
+    get:
+      tags:
+        - auth
+      summary: Refresh access token
+      description: Refresh access token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Unauthorized - Refresh token expired or invalid                
+  /user/:
+    get:
+      tags:
+        - user
+      summary: Get user profile information
+      description: Fetches user profile information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile fetched successfully
+          content:
+            application/json:
+              example:
+                userId: "uuid-123-456"
+                email: "dl3@test.com"
+                firstName: "John"
+                lastName: "Doe"
+                avatarUrl: "http://example.com/storage/avatar.png"
+        '401':
+          description: Unauthorized - invalid or missing token
+  /user/update/:
+    post:
+      tags:
+        - user
+      summary: Update user information
+      description: Updates the information of the user authenticated
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateDto'
+      responses:
+        '201':
+          description: User updated successfully
+        '400':
+          description: Bad request - empty fields
+        '401':
+          description: Unauthorized - token missing or invalid
+  /user/uploadAvatar:
+    post:
+      tags:
+        - user
+      summary: Upload user avatar
+      description: Uploads an image file (.png, .jpeg, .webp) as an avatar
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AvatarUploadDto'
+      responses:
+        '201':
+          description: Avatar uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  avatarUrl:
+                    type: string
+        '400':
+          description: Bad request - invalid type or large file
+        '401':
+          description: Unauthorized - invalid or missing token
+  /devices/:
+    get:
+      tags:
+        - devices
+      summary: List all devices
+      description: List all devices
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of devices owned by the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+              example:
+                - id: "dev-001"
+                  name: "Living Room Light"
+                  type: "Light"
+                  favorite: false
+        '401':
+          description: Unauthorized
+  /devices/favorites/:
+    get:
+      tags:
+        - devices
+      summary: Get favorite devices
+      description: Get favorite devices
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of favorite devices
+          content:
+            application/json:
+              example:
+                - id: "dev-002"
+                  name: "Bedroom Lamp"
+                  type: "Light"
+                  favorite: true
+        '401':
+          description: Unauthorized
+  /devices/{id}/favorite:
+    get:
+      tags:
+        - devices
+      summary: Toggle device favorite status
+      description: Favorite toggle status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Toggle status saved successfully
+          content:
+            application/json:
+              example: true
+        '401':
+          description: Unauthorized
+        '404':
+          description: Device not found
+  /devices/{id}/onOff/toggle:
+    get:
+      tags:
+        - devices
+      summary: Toggle on/off status
+      description: Toggle on/off status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Toggle on/off status changed successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Device not found
+  /devices/{id}/delete:
+    get:
+      tags:
+        - devices
+      summary: Deletes a device
+      description: Deletes a device
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Device deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Device not found
+  /devices/add:
+    post:
+      tags:
+        - devices
+      summary: Adds a new device
+      description: Adds a new device
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeviceReq'
+      responses:
+        '201':
+          description: New device added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '400':
+          description: Bad Request - Validation failed
+        '401':
+          description: Unauthorized
+  /apartments/:
+    get:
+      tags:
+        - apartments
+      summary: List all apartments
+      description: List of all apartments owned by user
+      security:
+          - bearerAuth: []
+      responses:
+        '200':
+          description: Apartment list fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Apartment'
+              example:
+                - id: "apt-111"
+                  name: "Summer House"
+                  location: "Vaasa"
+                - id: "apt-222"
+                  name: "Winter Cabin"
+                  location: "Rovaniemi"
+        '401':
+          description: Unauthorized
+    post:
+        tags:
+          - apartments
+        summary: Creates a new apartment
+        description: Creates a new apartment
+        security:
+          - bearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateApartmentDto'
+        responses:
+          '201':
+            description: Apartment created successfully
+          '400':
+            description: Bad Request - some fields are missing
+          '401':
+            description: Unauthorized
+  /apartments/{id}/:
+    get:
+      tags:
+        - apartments
+      summary: Gets an apartment by ID
+      description: Gets an apartment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Apartment fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Apartment'
+        '404':
+          description: Apartment not registered
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - apartments
+      summary: Update apartment details
+      description: Updates the details of an apartment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApartmentDto'
+      responses:
+        '200':
+          description: Apartment updated successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Apartment not registered
+    delete:
+      tags:
+        - apartments
+      summary: Deletes an apartment
+      description: Deletes an apartment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Apartment deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Apartment not registered
+  /rooms/apartment/{apartmentId}/:
+    get:
+      tags:
+        - rooms
+      summary: Get all rooms in one apartment
+      description: Get all rooms in one apartment
+      parameters:
+        - name: apartmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of rooms fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'
+              example:
+                - id: "room-001"
+                  name: "Living Room"
+                  location: "First Floor"
+                  apartmentId: "apt-111"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Apartment not found
+  /rooms/{id}/:
+    get:
+      tags:
+        - rooms
+      summary: Gets a single room by ID
+      description: Gets a single room by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Room fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Room not registered
+    put:
+      tags:
+        - rooms
+      summary: Update room details
+      description: Updates the details of a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoomDto'
+      responses:
+        '200':
+          description: Room details updated successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Room not registered
+    delete:
+      tags:
+        - rooms
+      summary: Deletes a room
+      description: Deletes a room by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Room deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Room not registered
+  /rooms/:
+    post:
+      tags:
+        - rooms
+      summary: Creates a new room
+      description: Creates a new room in an apartment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoomDto'
+      responses:
+        '201':
+          description: Room created successfully
+        '400':
+          description: Bad Request - missing fields
+        '401':
+          description: Unauthorized
+  /scenarios/:
+    get:
+      tags:
+        - scenarios
+      summary: List all scenarios
+      description: List of all automated scenarios
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of scenarios fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Scenario'
+              example:
+                - id: "scen-001"
+                  name: "Morning Routine"
+                  isActive: true
+                  actions: []
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - scenarios
+      summary: Creates a new scenario
+      description: Creates a new scenario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScenarioDto'
+      responses:
+        '201':
+          description: New scenario added successfully
+        '400':
+          description: Bad Request - validation failed
+        '401':
+          description: Unauthorized
+  /scenarios/{id}/:
+    get:
+      tags:
+        - scenarios
+      summary: Gets a scenario by ID
+      description: Gets a particular scenario by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Scenario details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+        '404':
+          description: Scenario not found
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - scenarios
+      summary: Update a scenario
+      description: Updates a scenario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScenarioDto'
+      responses:
+        '200':
+          description: Scenario updated successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Scenario not found
+    delete:
+      tags:
+        - scenarios
+      summary: Deletes a scenario
+      description: Deletes a scenario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Scenario deleted successfully
+        '401':
+          description: Unauthorized
+        '404':  
+          description: Scenario not found
+  /scenarios/{id}/toggle/:
+    get:
+      tags:
+        - scenarios
+      summary: Toggle scenario activation
+      description: Enabe/disable the scenario.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Scenario status changed successfully
+          content:
+            application/json:
+              example: { "isActive": true }
+        '401':
+          description: Unauthorized
+        '404':
+          description: Scenario not found

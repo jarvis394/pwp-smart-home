@@ -4,6 +4,7 @@ import { AppModule } from './app/app.module'
 import { ConfigService } from './config/config.service'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
+import { AllExceptionsFilter } from './filters/rpc-exception.filter'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 
 async function bootstrap() {
@@ -13,6 +14,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix(globalPrefix)
   app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalFilters(new AllExceptionsFilter())
   app.useStaticAssets(config.UPLOADS_PATH, {
     index: false,
     prefix: `/${globalPrefix}/uploads/`,
