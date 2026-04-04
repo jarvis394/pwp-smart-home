@@ -120,13 +120,47 @@ export class DevicesService {
   }
 
   async addDevice(userId: User['id'], data: AddDeviceReq): Promise<Device> {
-    const [result] = await this.db
-      .insert(devices)
-      .values({
-        userId,
-        ...data,
+    const result = await this.db.transaction(async (tx) => {
+      const user = await tx.query.users.findFirst({
+        where: (fields, { eq }) => eq(fields.id, userId),
       })
-      .returning()
+
+      if (!user) {
+        throw new ForbiddenException('User not found')
+      }
+
+      const roomId = data.roomId
+      if (!roomId) {
+        throw new ForbiddenException('Room not found')
+      }
+
+      const room = await tx.query.rooms.findFirst({
+        where: (fields, { eq }) => eq(fields.id, roomId),
+      })
+
+      if (!room) {
+        throw new ForbiddenException('Room not found')
+      }
+
+      const apartment = await tx.query.apartments.findFirst({
+        where: (fields, { eq, and }) =>
+          and(eq(fields.id, room.apartmentId), eq(fields.userId, userId)),
+      })
+
+      if (!apartment) {
+        throw new ForbiddenException('Room does not belong to user')
+      }
+
+      const [inserted] = await tx
+        .insert(devices)
+        .values({
+          userId,
+          ...data,
+        })
+        .returning()
+
+      return inserted
+    })
 
     if (!result) {
       throw new InternalServerErrorException('Did not insert new device')

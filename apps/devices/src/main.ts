@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app/app.module'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { HttpExceptionFilter } from './filters/rpc-exception.filter'
 
 async function bootstrap() {
   const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost:5672'
@@ -18,6 +19,8 @@ async function bootstrap() {
       },
     }
   )
+
+  app.useGlobalFilters(new HttpExceptionFilter())
 
   await app.listen()
   Logger.log('🚀 Devices service is running')

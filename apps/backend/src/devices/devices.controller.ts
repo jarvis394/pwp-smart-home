@@ -9,7 +9,6 @@ import {
   Inject,
 } from '@nestjs/common'
 import { Device } from './dto/device.dto'
-import { CreateDeviceReq } from './dto/add-device-dto'
 import { DevicesService } from './devices.service'
 import { JwtAuthGuard } from '../auth/strategies/jwt.strategy'
 import { RequestWithUser } from '../auth/auth.controller'
@@ -154,7 +153,7 @@ export class DevicesController {
     summary: 'Adds a new device',
     description: 'Adds a new device',
   })
-  @ApiBody({ type: CreateDeviceReq })
+  @ApiBody({ type: Device })
   @ApiResponse({
     status: 201,
     description: 'New device added successfully',
