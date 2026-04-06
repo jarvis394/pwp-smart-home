@@ -16,9 +16,33 @@ services:
       POSTGRES_DB: ${DB_DATABASE}
     volumes:
       - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management
+    healthcheck:
+      test: rabbitmq-diagnostics -q check_running
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db_migrate:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    environment:
+      DB_HOST: db
+      POSTGRES_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_DATABASE}
+    command: ["yarn", "db:migrate"]
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
 
   backend:
     build:
@@ -28,9 +52,19 @@ services:
     ports:
       - '5000:5000'
     depends_on:
-      - db
-      - redis
-      - rabbitmq
+      db:
+        condition: service_healthy
+      db_migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      POSTGRES_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_DATABASE}
     env_file:
       - .env
 
@@ -40,8 +74,16 @@ services:
       dockerfile: apps/devices/Dockerfile
     restart: always
     depends_on:
-      - db
-      - rabbitmq
+      db:
+        condition: service_healthy
+      db_migrate:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      RABBITMQ_HOST: rabbitmq
+      POSTGRES_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_DATABASE}
     env_file:
       - .env
 
