@@ -2,8 +2,6 @@ services:
   redis:
     image: redis:latest
     restart: always
-    ports:
-      - '6379:6379'
     volumes:
       - redis_data:/data
 
@@ -16,16 +14,48 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE}
-    ports:
-      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql
 
   rabbitmq:
     image: rabbitmq:3-management
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    restart: always
     ports:
-      - '5672:5672'
-      - '15672:15672'
+      - '5000:5000'
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    env_file:
+      - .env
+
+  devices:
+    build:
+      context: .
+      dockerfile: apps/devices/Dockerfile
+    restart: always
+    depends_on:
+      - db
+      - rabbitmq
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    restart: always
+    ports:
+      - '4200:4200'
+    depends_on:
+      - backend
+    env_file:
+      - .env
 
 volumes:
   postgres_data:
