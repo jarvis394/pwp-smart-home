@@ -21,8 +21,13 @@ export const apartments = pgTable('apartments', {
     }),
 })
 
-export const apartmentsRelations = relations(apartments, ({ many }) => ({
+
+export const apartmentsRelations = relations(apartments, ({ one, many }) => ({
   rooms: many(rooms),
+  user: one(users, {
+    fields: [apartments.userId],
+    references: [users.id],
+  }),
 }))
 
 export type Apartment = InferSelectModel<typeof apartments>

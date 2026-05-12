@@ -34,9 +34,9 @@ describe('Scenarios (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         name: 'Dim Lights',
-        actions: { lights: 'off', blinds: 'closed' },
+        actions: [{ lights: 'off', blinds: 'closed' }],
       })
-
+    console.log('Validation error:', JSON.stringify(res.body))
     expect(res.status).toBe(201)
     expect(res.body.name).toBe('Dim Lights')
 
@@ -48,7 +48,7 @@ describe('Scenarios (e2e)', () => {
       .post('/api/scenarios')
       .send({
         name: 'Dim Lights',
-        actions: { lights: 'off', blinds: 'closed' },
+        actions: [{ lights: 'off', blinds: 'closed' }],
       })
 
     expect(res.status).toBe(401)
