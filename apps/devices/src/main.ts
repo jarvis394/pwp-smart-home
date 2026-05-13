@@ -23,7 +23,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter())
 
   await app.listen()
-  Logger.log('🚀 Devices service is running')
+  Logger.log(' Devices service is running')
 }
 
 bootstrap()
