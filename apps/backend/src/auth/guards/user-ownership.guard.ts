@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common'
 import { RequestWithUser } from '../auth.controller'
 
-// Guard to ensure that users can only access their own resources based on user ID in the URL and token
 @Injectable()
 export class UserOwnershipGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {

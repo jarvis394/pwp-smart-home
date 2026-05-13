@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { NewUser } from '@smart-home/db/schema'
 import { IsEmail, IsNotEmpty } from 'class-validator'
 
-// Data Transfer Object (DTO) for user registration, containing email, password, first name, last name, and optional avatar URL
 export class RegisterDto implements NewUser {
   @ApiProperty({
     description: 'User email',

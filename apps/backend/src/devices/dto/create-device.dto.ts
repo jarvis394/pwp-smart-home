@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsString, IsOptional, IsUUID } from 'class-validator'
 
-// Data Transfer Object (DTO) for creating a new device
 export class CreateDeviceDto {
   @ApiProperty()
   @IsString()

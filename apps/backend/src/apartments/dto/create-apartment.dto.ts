@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsString } from 'class-validator'
 
-// Data Transfer Object (DTO) for creating a new apartment
 export class CreateApartmentDto {
   @ApiProperty({ description: 'Name of an apartment', example: 'My Home' })
   @IsString()

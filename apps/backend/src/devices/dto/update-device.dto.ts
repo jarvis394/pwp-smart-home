@@ -1,8 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { IsString, IsOptional, IsUUID } from 'class-validator'
 
-// Data Transfer Object (DTO) for updating an existing device,
-// allowing optional fields for partial updates
 export class UpdateDeviceDto {
   @ApiPropertyOptional({ description: 'New name for the device' })
   @IsOptional()

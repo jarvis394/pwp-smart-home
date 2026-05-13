@@ -16,7 +16,6 @@ export interface JwtPayload {
   sub: string
 }
 
-// Service for handling authentication logic, including user validation, token generation, and registration
 @Injectable()
 export class AuthService {
   constructor(
@@ -25,7 +24,6 @@ export class AuthService {
     private configService: ConfigService
   ) {}
 
-  // Method to update the refresh token for a user, hashing it before storing in the database
   async updateRefreshToken(userId: string, refreshToken: string) {
     const hashedRefreshToken = await this.userService.hash(refreshToken)
     await this.userService.update(userId, {
@@ -33,14 +31,12 @@ export class AuthService {
     })
   }
 
-  // Method to remove the refresh token for a user, effectively logging them out from all sessions
   async removeRefreshToken(userId: string) {
     await this.userService.update(userId, {
       refreshToken: null,
     })
   }
 
-  // Method to refresh access tokens using a valid refresh token, ensuring the user is authenticated and the token matches
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.userService.findById(userId)
 
@@ -57,7 +53,6 @@ export class AuthService {
     return tokens
   }
 
-  // Method to validate user credentials during login, returning user information if valid
   async validateUser(
     email: string,
     password: string
@@ -70,7 +65,6 @@ export class AuthService {
     }
   }
 
-  // Method to handle user login, generating access and refresh tokens upon successful authentication
   async login(userId: string, email: string): Promise<UserLoginRes> {
     const user = await this.userService.findById(userId)
     if (!user) {
@@ -83,13 +77,11 @@ export class AuthService {
     return { user: this.userService.serializeUser(user), tokens }
   }
 
-  // Method to handle user logout, removing the refresh token to invalidate any existing sessions
   async logout(userId: string) {
     this.removeRefreshToken(userId)
     return { ok: true }
   }
 
-  // Method to generate JWT access and refresh tokens for a user, using the user's ID and email as payload
   async getTokens(id: string, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
@@ -120,7 +112,6 @@ export class AuthService {
     }
   }
 
-  // Method to handle user registration, creating a new user and generating tokens for the new account
   async register(userData: Omit<NewUser, 'devices' | 'refreshToken'>) {
     const user = await this.userService.register(userData)
     const tokens = await this.getTokens(user.id, user.email)

@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsArray, IsOptional, IsString } from 'class-validator'
 
-// Data Transfer Object (DTO) for updating an existing scenario, allowing optional
-// fields for partial updates, including validation and API documentation metadata
 export class UpdateScenarioDto {
   @ApiProperty({
     description: 'Updated name of scenario',

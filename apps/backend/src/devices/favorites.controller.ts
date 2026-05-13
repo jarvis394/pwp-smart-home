@@ -12,8 +12,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 
-// Controller for managing user devices, including CRUD operations and state management,
-// with caching for improved performance
 @ApiTags('devices')
 @Controller('user/:user_id')
 @UseGuards(JwtAuthGuard, UserOwnershipGuard)
@@ -24,7 +22,6 @@ export class UserFavoritesController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  // Endpoint to retrieve all favorite devices for a user, and caching for improved performance
   @Get('favorites')
   @ApiOperation({ summary: 'Get favorite devices of a user' })
   @ApiResponse({ status: 200, type: Device, isArray: true })

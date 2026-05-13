@@ -38,9 +38,6 @@ import AvatarUploadDto from './dto/avatar-upload.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import 'multer'
 
-// Controller for managing user profiles, including fetching user information,
-// updating user details, and handling avatar uploads, with caching for improved
-// performance and guards for authentication and authorization
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -49,8 +46,6 @@ export class UserController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  // Endpoint to retrieve user profile information by ID, with caching for performance
-  // and handling potential cache misses by fetching from the service layer
   @UseGuards(JwtAuthGuard)
   @Get(':user_id')
   @ApiBearerAuth()
@@ -87,9 +82,6 @@ export class UserController {
     return result
   }
 
-  // Endpoint to update user information, allowing partial updates and ensuring that
-  // the user is authenticated and authorized to update their own profile, with caching
-  // for performance and handling potential cache invalidation after the update
   @UseGuards(JwtAuthGuard, UserOwnershipGuard)
   @Put(':user_id')
   @ApiBearerAuth()
@@ -120,10 +112,6 @@ export class UserController {
     return result
   }
 
-  // Endpoint to upload a user avatar, ensuring that the user is authenticated
-  // and authorized to upload an avatar for their own profile, with validation
-  // for the uploaded file type and size, and handling potential errors during
-  // the upload process, as well as cache invalidation after a successful upload
   @UseGuards(JwtAuthGuard, UserOwnershipGuard)
   @Post(':user_id/avatar')
   @UseInterceptors(FileInterceptor('file'))
@@ -168,10 +156,6 @@ export class UserController {
     return result
   }
 
-  // Endpoint to update a user avatar, ensuring that the user is authenticated
-  // and authorized to update the avatar for their own profile, with handling
-  // potential errors during the update process, as well as cache invalidation
-  // after a successful update
   @UseGuards(JwtAuthGuard, UserOwnershipGuard)
   @Put(':user_id/avatar')
   @UseInterceptors(FileInterceptor('file'))
@@ -203,9 +187,6 @@ export class UserController {
     return result
   }
 
-  // Endpoint to delete a user avatar, ensuring that the user is authenticated and
-  // authorized to delete the avatar for their own profile, with handling potential errors
-  // during the deletion process, as well as cache invalidation after a successful deletion
   @UseGuards(JwtAuthGuard, UserOwnershipGuard)
   @Delete(':user_id/avatar')
   @ApiBearerAuth()

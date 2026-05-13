@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { DeviceCapabilities, DeviceState, DeviceType } from '@smart-home/db'
 
-// Data Transfer Object (DTO) representing a device, including its properties
-// and metadata for API documentation
 export class Device {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   id: string

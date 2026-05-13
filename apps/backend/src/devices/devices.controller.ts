@@ -41,8 +41,6 @@ export class DevicesController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  // Endpoint to retrieve all devices for a user, with optional filtering by room,
-  // and caching for performance
   @Get()
   @ApiOperation({
     summary: 'List all devices of a user',
@@ -62,7 +60,6 @@ export class DevicesController {
     return devices
   }
 
-  // Endpoint to retrieve a single device by its ID, throwing a 404 error if not found
   @Get(':device_id')
   @ApiOperation({ summary: 'Get a single device' })
   @ApiResponse({ status: 200, type: Device })
@@ -79,7 +76,6 @@ export class DevicesController {
     return device
   }
 
-  // Endpoint to retrieve all favorite devices for a user, with caching for performance
   @Post()
   @ApiOperation({ summary: 'Add a new device' })
   @ApiBody({ type: CreateDeviceDto })
@@ -93,8 +89,6 @@ export class DevicesController {
     return device
   }
 
-  // Endpoint to update an existing device, allowing partial updates, and throwing a
-  // 404 error if the device is not found
   @Put(':device_id')
   @ApiOperation({ summary: 'Update a device' })
   @ApiBody({ type: UpdateDeviceDto })
@@ -115,8 +109,6 @@ export class DevicesController {
     return device
   }
 
-  // Endpoint to toggle the favorite status of a device, returning the new status,
-  // and throwing a 404 error if the device is not found
   @Put(':device_id/favorite')
   @ApiOperation({ summary: 'Toggle favorite' })
   @ApiResponse({
@@ -132,8 +124,6 @@ export class DevicesController {
     return state
   }
 
-  // Endpoint to set the power state of a device (on/off), throwing a 400 error
-  // if the toggle parameter is missing, and a 404 error if the device is not found
   @Put(':device_id/state')
   @ApiOperation({ summary: 'Toggle power state' })
   @ApiQuery({ name: 'toggle', required: true, enum: ['on', 'off'] })
@@ -153,7 +143,6 @@ export class DevicesController {
     return result
   }
 
-  // Endpoint to delete a device, throwing a 404 error if the device is not found
   @Delete(':device_id')
   @ApiOperation({ summary: 'Delete a device' })
   @ApiResponse({ status: 200, description: 'Device deleted' })
@@ -166,8 +155,6 @@ export class DevicesController {
     return { success: true }
   }
 
-  // Helper method to invalidate device-related caches for a user after changes
-  // to ensure data consistency
   private async invalidateDeviceCaches(userId: string) {
     await this.cacheManager.del(`devices-${userId}`)
     await this.cacheManager.del(`devices-fav-${userId}`)

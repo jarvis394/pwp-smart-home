@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger'
 import { User } from '@smart-home/db/schema'
 import { IsEmail, IsNotEmpty } from 'class-validator'
 
-// Data Transfer Object (DTO) for user login, containing email and password fields
 export class LoginDto implements Pick<User, 'email' | 'password'> {
   @ApiProperty({
     description: 'User email',

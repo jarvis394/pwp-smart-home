@@ -28,7 +28,6 @@ import { Scenario } from './dto/scenario-response.dto'
 import { CreateScenarioDto } from './dto/create-scenario.dto'
 import { UpdateScenarioDto } from './dto/update-scenario.dto'
 
-// Controller for managing user scenarios, including CRUD operations and state management, with caching for improved performance
 @ApiTags('scenarios')
 @Controller('user/:user_id/scenarios')
 @UseGuards(JwtAuthGuard, UserOwnershipGuard)
@@ -39,7 +38,6 @@ export class ScenariosController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  // Endpoint to retrieve all scenarios for a user, with caching for performance, and handling potential cache misses by fetching from the service layer
   @Get()
   @ApiOperation({
     summary: 'List all scenarios of a user',
@@ -64,7 +62,6 @@ export class ScenariosController {
     return scenarios
   }
 
-  // Endpoint to retrieve a single scenario by its ID for a user, ensuring that the scenario belongs to the user, and handling potential errors such as scenario not found or unauthorized access
   @Get(':scenario_id')
   @ApiOperation({
     summary: 'Get a single scenario',
@@ -86,7 +83,6 @@ export class ScenariosController {
     return await this.scenariosService.getById(userId, scenarioId)
   }
 
-  // Endpoint to create a new scenario for a user, with validation of the request body, ensuring that the scenario is associated with the user, and handling potential errors during creation, as well as cache invalidation after successful creation
   @Post()
   @ApiOperation({
     summary: 'Create a new scenario',
@@ -106,7 +102,6 @@ export class ScenariosController {
     return scenario
   }
 
-  // Endpoint to update an existing scenario's details, allowing partial updates, with validation of the request body, ensuring that the scenario belongs to the user, and handling potential errors during the update process, as well as cache invalidation after successful update
   @Put(':scenario_id')
   @ApiOperation({
     summary: 'Update a scenario',
@@ -132,7 +127,6 @@ export class ScenariosController {
     return scenario
   }
 
-  // Endpoint to set the active state of a scenario, allowing users to activate or deactivate their scenarios, with validation of the query parameter, ensuring that the scenario belongs to the user, and handling potential errors during the state change process, as well as cache invalidation after successful update
   @Put(':scenario_id/state')
   @ApiOperation({
     summary: 'Set scenario active state',
@@ -171,9 +165,6 @@ export class ScenariosController {
     return scenario
   }
 
-  // Endpoint to delete a scenario by its ID for a user, with appropriate
-  // error handling and cache invalidation to ensure that the deleted
-  // scenario is removed from the cache, and only the owner can delete their scenarios
   @Delete(':scenario_id')
   @ApiOperation({
     summary: 'Delete a scenario',

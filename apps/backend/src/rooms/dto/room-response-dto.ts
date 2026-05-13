@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsString } from 'class-validator'
 
-// Data Transfer Object (DTO) representing a room,
-// including its properties and metadata for API documentation
 export class Room {
   @ApiProperty({
     example: 'room-001',

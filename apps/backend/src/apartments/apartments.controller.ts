@@ -35,7 +35,6 @@ export class ApartmentsController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  // Get all apartments for a user
   @Get()
   @ApiOperation({
     summary: 'List all apartments of a user',
@@ -59,7 +58,6 @@ export class ApartmentsController {
     return result
   }
 
-  // Get a single apartment by ID
   @Get(':apartment_id')
   @ApiOperation({
     summary: 'Get a single apartment',
@@ -80,7 +78,6 @@ export class ApartmentsController {
     return await this.apartmentsService.getById(userId, apartmentId)
   }
 
-  // Create a new apartment
   @Post()
   @ApiOperation({
     summary: 'Create a new apartment',
@@ -103,7 +100,6 @@ export class ApartmentsController {
     return result
   }
 
-  // Update an existing apartment
   @Put(':apartment_id')
   @ApiOperation({
     summary: 'Update apartment details',
@@ -128,7 +124,6 @@ export class ApartmentsController {
     return result
   }
 
-  // Delete an apartment
   @Delete(':apartment_id')
   @ApiOperation({
     summary: 'Delete an apartment',

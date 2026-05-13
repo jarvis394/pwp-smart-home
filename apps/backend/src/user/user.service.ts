@@ -25,10 +25,6 @@ import { eq } from '@smart-home/db'
 import { NewUser, User, users } from '@smart-home/db/schema'
 import fs from 'fs/promises'
 
-// Service for managing user profiles, including business logic for fetching
-// user information, updating user details, and handling avatar uploads,
-// with caching for improved performance and guards for authentication and
-// authorization
 @Injectable()
 export class UserService {
   private readonly logger = new Logger('UserSerivce')
@@ -39,8 +35,6 @@ export class UserService {
     private configService: ConfigService
   ) {}
 
-  // Helper method to serialize a User entity into an ApiUser DTO,
-  // which is used for sending user information in API responses
   serializeUser(user: User): ApiUser {
     return {
       id: user.id,
@@ -51,25 +45,18 @@ export class UserService {
     }
   }
 
-  // Method to find a user by their email address, which is used for authentication
-  // and other operations that require looking up a user by email
   async findByEmail(email: string) {
     return await this.db.query.users.findFirst({
       where: (fields, { eq }) => eq(fields.email, email),
     })
   }
 
-  // Method to find a user by their unique ID, which is used for fetching user information
-  // and performing operations that require looking up a user by their ID
   async findById(id: string) {
     return await this.db.query.users.findFirst({
       where: (fields, { eq }) => eq(fields.id, id),
     })
   }
 
-  // Method to update a user's information, allowing partial updates and returning the
-  // updated user, which is used for updating user details in the profile management
-  // features
   async update(id: string, update: Partial<User>) {
     const [res] = await this.db
       .update(users)
@@ -79,10 +66,6 @@ export class UserService {
     return res
   }
 
-  // Method to update user information, allowing partial updates and ensuring
-  // that the user is authenticated and authorized to update their own profile,
-  // with caching for performance and handling potential cache invalidation
-  // after the update
   async updateInfo(
     userId: string,
     update: UserUpdateReq
@@ -98,9 +81,6 @@ export class UserService {
     }
   }
 
-  // Method to handle user login by verifying the provided email and password,
-  // and returning the user if the credentials are valid, which is used for
-  // authenticating users in the application
   async login(email: string, password: string): Promise<User> {
     const user = await this.findByEmail(email)
 
@@ -117,9 +97,6 @@ export class UserService {
     return user
   }
 
-  // Method to handle user registration by creating a new user with the provided information,
-  // ensuring that the email is unique, hashing the password, and returning the created user,
-  // which is used for allowing new users to sign up for the application
   async register(
     user: Omit<NewUser, 'devices' | 'refreshToken'>
   ): Promise<User> {
@@ -169,10 +146,6 @@ export class UserService {
     }
   }
 
-  // Method to update user information, allowing partial updates and ensuring
-  // that the user is authenticated and authorized to update their own profile,
-  // with caching for performance and handling potential cache invalidation
-  // after the update
   async updateAvatar(
     userId: string,
     file: Express.Multer.File
@@ -195,10 +168,6 @@ export class UserService {
     return { avatarUrl: url }
   }
 
-  // Method to delete a user's avatar, ensuring that the user is authenticated and authorized
-  // to delete their own avatar, and handling potential errors during the deletion process,
-  // including removing the avatar file from storage and updating the user's profile to
-  // reflect the deletion
   async deleteAvatar(userId: string): Promise<void> {
     const user = await this.findById(userId)
     if (!user) {
@@ -223,9 +192,6 @@ export class UserService {
       .where(eq(users.id, userId))
   }
 
-  // Helper method to save an uploaded avatar file to the server's storage,
-  // converting it to WebP format and returning the URL for the saved avatar,
-  // which is used for handling avatar uploads in the profile management features
   private async saveFileToUploads(buffer: Buffer): Promise<string> {
     const fileName = `${uuidv4()}.webp`
     const savePath = path.join(this.configService.UPLOADS_PATH, fileName)

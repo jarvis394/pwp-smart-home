@@ -15,14 +15,12 @@ export class ApartmentsService {
     private db: Database
   ) {}
 
-  // Method to get all apartments for a specific user
   async getApartments(userId: string): Promise<Apartment[]> {
     return await this.db.query.apartments.findMany({
       where: (fields, { eq }) => eq(fields.userId, userId),
     })
   }
 
-  // Method to get a specific apartment by ID for a specific user
   async getById(userId: string, id: string): Promise<Apartment> {
     const apartment = await this.db.query.apartments.findFirst({
       where: (fields, { eq, and }) =>
@@ -32,7 +30,6 @@ export class ApartmentsService {
     return apartment
   }
 
-  // Method to create a new apartment for a specific user
   async create(
     userId: string,
     data: Omit<NewApartment, 'userId'>
@@ -47,7 +44,6 @@ export class ApartmentsService {
     return result
   }
 
-  // Method to update an existing apartment for a specific user
   async update(
     userId: string,
     id: string,
@@ -63,7 +59,6 @@ export class ApartmentsService {
     return result
   }
 
-  // Method to delete an apartment for a specific user
   async delete(userId: string, id: string): Promise<boolean> {
     const [result] = await this.db
       .delete(apartments)

@@ -27,8 +27,6 @@ import { Room } from './dto/room-response-dto'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { UpdateRoomDto } from './dto/update-room.dto'
 
-// Controller for managing rooms within user apartments, including CRUD operations
-// and filtering capabilities, with caching for improved performance
 @ApiTags('rooms')
 @Controller('user/:user_id/rooms')
 @UseGuards(JwtAuthGuard, UserOwnershipGuard)
@@ -39,8 +37,6 @@ export class RoomsController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  // Endpoint to retrieve all rooms for a user, with optional filtering by apartment
-  // and location, and caching for performance
   @Get()
   @ApiOperation({
     summary: 'List rooms of a user',
@@ -81,11 +77,16 @@ export class RoomsController {
       location,
     })
     await this.cacheManager.set(cacheKey, rooms)
+    const trackingKey = `cache-keys-${userId}`
+    const existingKeys: string[] =
+      (await this.cacheManager.get(trackingKey)) || []
+    if (!existingKeys.includes(cacheKey)) {
+      existingKeys.push(cacheKey)
+      await this.cacheManager.set(trackingKey, existingKeys)
+    }
     return rooms
   }
 
-  // Endpoint to retrieve a single room by its ID for a user, with appropriate error
-  // handling and API documentation
   @Get(':room_id')
   @ApiOperation({ summary: 'Get a single room by ID' })
   @ApiParam({ name: 'room_id', type: 'string', format: 'uuid' })
@@ -100,8 +101,6 @@ export class RoomsController {
     return await this.roomsService.getById(userId, roomId)
   }
 
-  // Endpoint to create a new room for a user within a specified apartment, with validation,
-  // error handling, and cache invalidation
   @Post()
   @ApiOperation({
     summary: 'Create a new room',
@@ -131,8 +130,6 @@ export class RoomsController {
     return room
   }
 
-  // Endpoint to update an existing room's details, allowing partial updates,
-  // with validation, error handling, and cache invalidation
   @Put(':room_id')
   @ApiOperation({ summary: 'Update room details' })
   @ApiParam({ name: 'room_id', type: 'string', format: 'uuid' })
@@ -150,8 +147,6 @@ export class RoomsController {
     return room
   }
 
-  // Endpoint to delete a room by its ID for a user, with appropriate error handling
-  // and cache invalidation
   @Delete(':room_id')
   @ApiOperation({ summary: 'Delete a room' })
   @ApiParam({ name: 'room_id', type: 'string', format: 'uuid' })
@@ -168,10 +163,12 @@ export class RoomsController {
     return { success: true }
   }
 
-  // Helper method to invalidate all room-related caches for a user,
-  // called after any operation that modifies room data to ensure cache consistency
   private async invalidateRoomCaches(userId: string) {
-    await this.cacheManager.del(`rooms-${userId}`)
+    const trackingKey = `cache-keys-${userId}`
+    const keys: string[] = (await this.cacheManager.get(trackingKey)) || []
+
+    await Promise.all(keys.map((key) => this.cacheManager.del(key)))
+    await this.cacheManager.del(trackingKey)
   }
 
   public static getRoomsCacheKey(userId: string): string {

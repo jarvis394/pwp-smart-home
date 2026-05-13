@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsOptional, IsString } from 'class-validator'
 
-// Data Transfer Object (DTO) for updating an existing apartment
 export class UpdateApartmentDto {
   @ApiProperty({
     description: 'Name of an apartment',
