@@ -16,7 +16,7 @@ This project uses NestJS, a progressive Node.Js framework. official documentatio
 We followed key NestJS best practices:
 - Modular design with separate feature modules (e.g., devices, auth, scenarios).
 - DTOs and ValidationPipe for automatic request validation.
-- Transport.MQ for microservices communication via RabbitMQ.
+- Transport.RMQ for microservices communication via RabbitMQ.
 - Dependency injection throughout the application.
 - Centralized configuration with environment variables and @nestjs/config.
 - Testing with @nestjs/testing and supertest.
@@ -68,7 +68,7 @@ yarn db:studio
 
 If you do not have Docker installed and want to run it on a local machine instead:
 
-* Download Postgresql and install on your local machine before continuing to the next stage. During Postgresql software installation, set password as postgres to keep the credential as default
+* Download Postgresql and install on your local machine before continuing to the next stage. During Postgresql software installation, set a strong password and use the same password in your .env file
 * Click on start menu and find `pgAdmin` which is postgre Web GUI. Open it and click on the current server to connect.Enter the password (postgres) from the during installation to  connect successfully.
 * Right-click on Databases and  click on Create - Database. Enter  `smart_home` as the database and click on save.
 * CD (Change directory) to the proect direct and follow the steps below

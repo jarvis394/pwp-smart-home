@@ -100,25 +100,6 @@ export class DevicesService {
     return result?.favorite ?? false
   }
 
-  async toggleOnOff(
-    userId: User['id'],
-    deviceId: Device['id']
-  ): Promise<boolean> {
-    const result = await this.getDevice(userId, deviceId)
-    if (!result?.capabilities.on_off) {
-      throw new ForbiddenException('Unsupported device feature')
-    }
-
-    result.capabilities.on_off.state.value =
-      !result.capabilities.on_off.state.value
-
-    await this.updateDevice(userId, deviceId, {
-      capabilities: result.capabilities,
-    })
-
-    return result.capabilities.on_off.state.value
-  }
-
   async addDevice(userId: User['id'], data: AddDeviceReq): Promise<Device> {
     const result = await this.db.transaction(async (tx) => {
       const user = await tx.query.users.findFirst({
@@ -167,5 +148,24 @@ export class DevicesService {
     }
 
     return this.serializeDevice(result)
+  }
+
+  async setDeviceState(
+    userId: User['id'],
+    deviceId: Device['id'],
+    on: boolean
+  ): Promise<boolean> {
+    const device = await this.getDevice(userId, deviceId)
+    if (!device?.capabilities.on_off) {
+      throw new ForbiddenException('Unsupported device feature')
+    }
+
+    device.capabilities.on_off.state.value = on
+
+    await this.updateDevice(userId, deviceId, {
+      capabilities: device.capabilities,
+    })
+
+    return on
   }
 }
