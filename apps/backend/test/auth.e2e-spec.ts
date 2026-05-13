@@ -11,14 +11,12 @@ describe('Auth (e2e)', () => {
   let app: INestApplication
   let accessToken: string
   let refreshToken: string
+
   beforeAll(async () => {
-    //createTestingModule() method takes module metadats and returns a Testing Module instance
-    //For unit tests, the method used is compile(), which is asynchronous.
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile()
 
-    //Nest is used to emulate HTTP request in e2e testing by using Supertest library
     app = moduleFixture.createNestApplication()
     app.setGlobalPrefix('api')
     app.useGlobalPipes(new ValidationPipe())
@@ -84,7 +82,7 @@ describe('Auth (e2e)', () => {
     refreshToken = res.body.tokens.refreshToken
   })
 
-  it('POST /api/auth/login - 403: invalid credentials', async () => {
+  it('POST /api/auth/login - 401: invalid credentials', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({
@@ -92,7 +90,7 @@ describe('Auth (e2e)', () => {
         password: 'wrongpassword',
       })
 
-    expect(res.status).toBe(403)
+    expect(res.status).toBe(401)
   })
 
   it('POST /api/auth/login - 400: invalid email format', async () => {
@@ -103,7 +101,7 @@ describe('Auth (e2e)', () => {
         password: 'dl3test123',
       })
 
-    expect(res.status).toBe(403)
+    expect(res.status).toBe(400)
   })
 
   it('GET /api/auth/refresh - 200: valid refresh token', async () => {

@@ -7,30 +7,32 @@ describe('Apartments (e2e)', () => {
   let app: INestApplication
   let token: string
   let apartmentId: string
+  let userId: string
+
+  const NON_EXISTENT_USER_ID = '00000000-0000-0000-0000-000000000000'
 
   beforeAll(async () => {
-    //createTestingModule() method takes module metadats and returns a Testing Module instance
-    //For unit tests, the method used is compile(), which is asynchronous.
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile()
 
-    //Nest is used to emulate HTTP request in e2e testing by using Supertest library
     app = moduleFixture.createNestApplication()
     app.setGlobalPrefix('api')
     app.useGlobalPipes(new ValidationPipe())
     await app.init()
 
-    const res = await request(app.getHttpServer())
+    const loginRes = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email: 'dl3@test.com', password: 'dl3test123' })
 
-    token = res.body.tokens.accessToken
+    token = loginRes.body.tokens.accessToken
+    userId = loginRes.body.user.id
   })
 
-  it('POST /api/apartments - 201: valid request', async () => {
+  // ---------- CREATE ----------
+  it('POST /api/user/{user_id}/apartments - 201: valid request', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/apartments')
+      .post(`/api/user/${userId}/apartments`)
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'Test Home', location: 'Helsinki' })
 
@@ -38,62 +40,80 @@ describe('Apartments (e2e)', () => {
     expect(res.body.name).toBe('Test Home')
     expect(res.body.location).toBe('Helsinki')
 
-    //May need ID for later testing
     apartmentId = res.body.id
   })
 
-  it('POST /api/apartments - 401: unauthorized', async () => {
+  it('POST /api/user/{user_id}/apartments - 401: unauthorized', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/apartments')
+      .post(`/api/user/${userId}/apartments`)
       .send({ name: 'Test Home', location: 'Helsinki' })
 
     expect(res.status).toBe(401)
   })
 
-  it('POST /api/apartments -   400: invalid request', async () => {
+  it('POST /api/user/{user_id}/apartments - 403: forbidden (different user)', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/apartments')
+      .post(`/api/user/${NON_EXISTENT_USER_ID}/apartments`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Test Home', location: 'Helsinki' })
+
+    expect(res.status).toBe(403)
+  })
+
+  it('POST /api/user/{user_id}/apartments - 400: invalid request', async () => {
+    const res = await request(app.getHttpServer())
+      .post(`/api/user/${userId}/apartments`)
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'Test Home' })
 
     expect(res.status).toBe(400)
   })
 
-  it('GET /api/apartments - 200: return list', async () => {
+  it('GET /api/user/{user_id}/apartments - 200: return list', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/apartments')
+      .get(`/api/user/${userId}/apartments`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
     expect(Array.isArray(res.body)).toBe(true)
   })
 
-  it('GET /api/apartments - 401: unauthorized', async () => {
-    const res = await request(app.getHttpServer()).get('/api/apartments')
+  it('GET /api/user/{user_id}/apartments - 401: unauthorized', async () => {
+    const res = await request(app.getHttpServer()).get(
+      `/api/user/${userId}/apartments`
+    )
 
     expect(res.status).toBe(401)
   })
 
-  it('GET /api/apartments:id - 200: single apartment', async () => {
+  it('GET /api/user/{user_id}/apartments - 403: forbidden (different user)', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/api/apartments/${apartmentId}`)
+      .get(`/api/user/${NON_EXISTENT_USER_ID}/apartments`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(403)
+  })
+
+  it('GET /api/user/{user_id}/apartments/:apartment_id - 200: single apartment', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/user/${userId}/apartments/${apartmentId}`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
     expect(res.body.id).toBe(apartmentId)
   })
 
-  it('GET /api/apartments:id - 404: invalid id', async () => {
+  it('GET /api/user/{user_id}/apartments/:apartment_id - 404: invalid id', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/apartments/invalid-uuid')
+      .get(`/api/user/${userId}/apartments/invalid-uuid`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(404)
   })
 
-  it('PUT /api/apartments:id - 200: update apartment', async () => {
+  it('PUT /api/user/{user_id}/apartments/:apartment_id - 200: update apartment', async () => {
     const res = await request(app.getHttpServer())
-      .put(`/api/apartments/${apartmentId}`)
+      .put(`/api/user/${userId}/apartments/${apartmentId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'Updated Home' })
 
@@ -101,17 +121,17 @@ describe('Apartments (e2e)', () => {
     expect(res.body.name).toBe('Updated Home')
   })
 
-  it('DELETE /api/apartments:id - 200: apartment deleted', async () => {
+  it('DELETE /api/user/{user_id}/apartments/:apartment_id - 200: apartment deleted', async () => {
     const res = await request(app.getHttpServer())
-      .delete(`/api/apartments/${apartmentId}`)
+      .delete(`/api/user/${userId}/apartments/${apartmentId}`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
   })
 
-  it('GET /api/apartments:id - 404: apartment not found after deleted', async () => {
+  it('GET /api/user/{user_id}/apartments/:apartment_id - 404: apartment not found after deleted', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/api/apartments/${apartmentId}`)
+      .get(`/api/user/${userId}/apartments/${apartmentId}`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(404)

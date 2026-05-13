@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { DevicesService } from './devices.service'
 import { DevicesController } from './devices.controller'
+import { UserFavoritesController } from './favorites.controller'
 import { ConfigService } from '../config/config.service'
 import { ClientProxyFactory, Transport } from '@nestjs/microservices'
 
@@ -26,6 +27,6 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices'
       },
     },
   ],
-  controllers: [DevicesController],
+  controllers: [DevicesController, UserFavoritesController],
 })
 export class DevicesModule {}

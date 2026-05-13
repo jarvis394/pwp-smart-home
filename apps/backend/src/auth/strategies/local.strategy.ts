@@ -1,6 +1,10 @@
 import { Strategy } from 'passport-local'
 import { AuthGuard, PassportStrategy } from '@nestjs/passport'
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common'
 import { AuthService } from '../auth.service'
 import { RequestWithUser } from '../auth.controller'
 
@@ -16,12 +20,22 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     email: string,
     password: string
   ): Promise<RequestWithUser['user']> {
-    try {
-      const user = await this.authService.validateUser(email, password)
-      return user
-    } catch (e) {
-      throw new HttpException('Invalid credentials', HttpStatus.FORBIDDEN)
+    if (!email || !this.isValidEmail(email)) {
+      throw new BadRequestException('Invalid email format')
     }
+    if (!password) {
+      throw new BadRequestException('Password is required')
+    }
+
+    const user = await this.authService.validateUser(email, password)
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials')
+    }
+    return user
+  }
+
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 }
 

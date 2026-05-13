@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsArray, IsString } from 'class-validator'
 
+// Data Transfer Object (DTO) for creating a new scenario,
+// including validation and API documentation metadata
 export class CreateScenarioDto {
   @ApiProperty({ description: 'Name of the scenario', example: 'Movie Night' })
   @IsString()

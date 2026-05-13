@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsString, IsUrl, IsOptional } from 'class-validator'
 
+// Data Transfer Object (DTO) representing a user response, including properties and
+// metadata for API documentation
 export class UserResponseDto {
   @ApiProperty({
     example: 'uuid-123-456',

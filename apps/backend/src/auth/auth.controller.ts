@@ -24,19 +24,22 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { LoginDto } from './dto/login.dto'
+import { Request as ExpressRequest } from 'express'
 
-export interface RequestWithUser extends Request {
+export interface RequestWithUser extends ExpressRequest {
   user: {
     userId: string
     email: string
   }
 }
 
+// Controller for authentication-related endpoints, including login, logout, registration, and token refresh
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  // Endpoint for user login, protected by LocalAuthGuard which validates email and password
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOperation({
@@ -60,6 +63,7 @@ export class AuthController {
     return await this.authService.login(req.user.userId, req.user.email)
   }
 
+  // Endpoint for user logout, protected by JwtAuthGuard which validates the access token
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get('logout')
@@ -76,6 +80,7 @@ export class AuthController {
     return await this.authService.logout(req.user.userId)
   }
 
+  // Endpoint for user registration, accepts user details and creates a new user account
   @Post('register')
   @ApiOperation({
     summary: 'User registration',
@@ -99,6 +104,7 @@ export class AuthController {
     })
   }
 
+  // Endpoint for refreshing access tokens, protected by JwtRefreshTokenAuthGuard which validates the refresh token
   @UseGuards(JwtRefreshTokenAuthGuard)
   @Get('refresh')
   @ApiOperation({

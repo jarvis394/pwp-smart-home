@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator'
+import { IsNotEmpty, IsString } from 'class-validator'
 
+// Data Transfer Object (DTO) for creating a new room, including validation
+// and API documentation metadata
 export class CreateRoomDto {
   @ApiProperty({ example: 'Kitchen', description: 'Name of the room' })
   @IsString()
@@ -11,9 +13,4 @@ export class CreateRoomDto {
   @IsString()
   @IsNotEmpty()
   location: string
-
-  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Unique identifier for room' })
-  @IsUUID()
-  @IsNotEmpty()
-  apartmentId: string
 }

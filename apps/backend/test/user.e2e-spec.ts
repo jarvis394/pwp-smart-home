@@ -6,59 +6,81 @@ import { AppModule } from '../src/app/app.module'
 describe('User (e2e)', () => {
   let app: INestApplication
   let token: string
+  let userId: string
 
   beforeAll(async () => {
-    //createTestingModule() method takes module metadats and returns a Testing Module instance
-    //For unit tests, the method used is compile(), which is asynchronous.
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile()
 
-    //Nest is used to emulate HTTP request in e2e testing by using Supertest library
     app = moduleFixture.createNestApplication()
     app.setGlobalPrefix('api')
     app.useGlobalPipes(new ValidationPipe())
     await app.init()
 
-    const res = await request(app.getHttpServer())
+    const loginRes = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email: 'dl3@test.com', password: 'dl3test123' })
 
-    token = res.body.tokens.accessToken
+    token = loginRes.body.tokens.accessToken
+    userId = loginRes.body.user.id
   })
 
-  it('GET /api/user - 200: get profile', async () => {
+  it('GET /api/user/:user_id - 200: get own profile', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/user')
+      .get(`/api/user/${userId}`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
     expect(res.body.user).toHaveProperty('email')
   })
 
-  it('POST /api/user/update - 201: valid request', async () => {
+  it('GET /api/user/:user_id - 401: no token', async () => {
+    const res = await request(app.getHttpServer()).get(`/api/user/${userId}`)
+
+    expect(res.status).toBe(401)
+  })
+
+  it('PUT /api/user/:user_id - 200: update own profile', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/user/update')
+      .put(`/api/user/${userId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         firstName: 'John',
         lastName: 'Doe',
       })
 
-    expect(res.status).toBe(201)
+    expect(res.status).toBe(200)
     expect(res.body.user.firstName).toBe('John')
     expect(res.body.user.lastName).toBe('Doe')
   })
 
-  //Using a buffer transparent image since supertest MIME type is image/png, as to not re edit the controller regex
-  it('POST /api/user/uploadAvatar - 201: upload image', async () => {
+  it('PUT /api/user/:user_id - 401: unauthorized', async () => {
+    const res = await request(app.getHttpServer())
+      .put(`/api/user/${userId}`)
+      .send({ firstName: 'X' })
+
+    expect(res.status).toBe(401)
+  })
+
+  it('PUT /api/user/:user_id - 403: forbidden (different user)', async () => {
+    const res = await request(app.getHttpServer())
+      .put('/api/user/00000000-0000-0000-0000-000000000000')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ firstName: 'Hacker' })
+
+    expect(res.status).toBe(403)
+  })
+
+  // ---------- CREATE AVATAR ----------
+  it('POST /api/user/:user_id/avatar - 201: upload avatar', async () => {
     const buffer = Buffer.from(
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
       'base64'
     )
 
     const res = await request(app.getHttpServer())
-      .post('/api/user/uploadAvatar')
+      .post(`/api/user/${userId}/avatar`)
       .set('Authorization', `Bearer ${token}`)
       .attach('file', buffer, {
         filename: 'test-avatar.png',
@@ -69,14 +91,13 @@ describe('User (e2e)', () => {
     expect(res.body).toHaveProperty('avatarUrl')
   })
 
-  //Test for wrong file format
-  it('POST /api/user/uploadAvatar - 400: wrong file type', async () => {
+  it('POST /api/user/:user_id/avatar - 400: wrong file type', async () => {
     const wrongFilebuffer = Buffer.from(
       'this is just a text file, not an image'
     )
 
     const res = await request(app.getHttpServer())
-      .post('/api/user/uploadAvatar')
+      .post(`/api/user/${userId}/avatar`)
       .set('Authorization', `Bearer ${token}`)
       .attach('file', wrongFilebuffer, {
         filename: 'not-an-image.txt',
@@ -87,10 +108,68 @@ describe('User (e2e)', () => {
     expect(res.body.message).toContain('Validation failed')
   })
 
-  it('GET /api/user - 401: unauthorized', async () => {
-    const res = await request(app.getHttpServer()).get('/api/user')
+  it('POST /api/user/:user_id/avatar - 403: forbidden (different user)', async () => {
+    const buffer = Buffer.from('fake')
 
-    expect(res.status).toBe(401)
+    const res = await request(app.getHttpServer())
+      .post('/api/user/00000000-0000-0000-0000-000000000000/avatar')
+      .set('Authorization', `Bearer ${token}`)
+      .attach('file', buffer, {
+        filename: 'hack.png',
+        contentType: 'image/png',
+      })
+
+    expect(res.status).toBe(403)
+  })
+
+  // ---------- UPDATE AVATAR ----------
+  it('PUT /api/user/:user_id/avatar - 200: update avatar', async () => {
+    const buffer = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+      'base64'
+    )
+
+    const res = await request(app.getHttpServer())
+      .put(`/api/user/${userId}/avatar`)
+      .set('Authorization', `Bearer ${token}`)
+      .attach('file', buffer, {
+        filename: 'new-avatar.png',
+        contentType: 'image/png',
+      })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveProperty('avatarUrl')
+  })
+
+  it('PUT /api/user/:user_id/avatar - 403: forbidden (different user)', async () => {
+    const buffer = Buffer.from('fake')
+    const res = await request(app.getHttpServer())
+      .put('/api/user/00000000-0000-0000-0000-000000000000/avatar')
+      .set('Authorization', `Bearer ${token}`)
+      .attach('file', buffer, {
+        filename: 'hack.png',
+        contentType: 'image/png',
+      })
+
+    expect(res.status).toBe(403)
+  })
+
+  // ---------- DELETE AVATAR ----------
+  it('DELETE /api/user/:user_id/avatar - 200: delete avatar', async () => {
+    const res = await request(app.getHttpServer())
+      .delete(`/api/user/${userId}/avatar`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.message).toBe('Avatar deleted')
+  })
+
+  it('DELETE /api/user/:user_id/avatar - 403: forbidden (different user)', async () => {
+    const res = await request(app.getHttpServer())
+      .delete('/api/user/00000000-0000-0000-0000-000000000000/avatar')
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(403)
   })
 
   afterAll(async () => {
