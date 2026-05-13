@@ -151,6 +151,9 @@ export class UserService {
     file: Express.Multer.File
   ): Promise<UserUploadAvatarRes> {
     const user = await this.findById(userId)
+    const url = await this.saveFileToUploads(file.buffer)
+    await this.update(userId, { avatarUrl: url })
+
     if (user?.avatarUrl) {
       const oldPath = path.join(
         this.configService.UPLOADS_PATH,
@@ -163,8 +166,6 @@ export class UserService {
       }
     }
 
-    const url = await this.saveFileToUploads(file.buffer)
-    await this.update(userId, { avatarUrl: url })
     return { avatarUrl: url }
   }
 
@@ -173,6 +174,11 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found')
     }
+
+    await this.db
+      .update(users)
+      .set({ avatarUrl: null })
+      .where(eq(users.id, userId))
 
     if (user.avatarUrl) {
       const filePath = path.join(
@@ -185,11 +191,6 @@ export class UserService {
         this.logger.warn(`Could not delete old avatar file: ${filePath}`)
       }
     }
-
-    await this.db
-      .update(users)
-      .set({ avatarUrl: null })
-      .where(eq(users.id, userId))
   }
 
   private async saveFileToUploads(buffer: Buffer): Promise<string> {

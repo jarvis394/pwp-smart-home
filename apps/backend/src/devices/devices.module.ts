@@ -20,7 +20,7 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices'
             urls: [config.RABBITMQ_URL],
             queue: 'devices_service_queue',
             queueOptions: {
-              durable: false,
+              durable: true,
             },
           },
         })

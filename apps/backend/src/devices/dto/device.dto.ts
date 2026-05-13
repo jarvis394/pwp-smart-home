@@ -25,7 +25,7 @@ export class Device {
     description: 'The specific hardware model',
     required: false,
   })
-  model: string | null
+  model?: string | null
 
   @ApiProperty({
     example: 'Light',
@@ -40,5 +40,5 @@ export class Device {
     description: 'The ID of the room where this device is located',
     required: false,
   })
-  roomId: string | null
+  roomId?: string | null
 }

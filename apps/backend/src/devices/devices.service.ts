@@ -33,10 +33,10 @@ export class DevicesService {
     userId: string,
     deviceId: string
   ): Promise<{ favorite: boolean }> {
-    const result: boolean = await firstValueFrom(
+    const { state } = await firstValueFrom(
       this.client.send({ cmd: 'toggleFavoriteDevice' }, { userId, deviceId })
     )
-    return { favorite: result }
+    return { favorite: state }
   }
 
   async setState(

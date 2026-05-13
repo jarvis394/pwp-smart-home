@@ -40,7 +40,7 @@ describe('Devices (e2e)', () => {
             case 'addDevice':
               return of({ ...mockDevice, id: 'mock-new', name: 'New Device' })
             case 'toggleFavoriteDevice':
-              return of(true)
+              return of({ state: true })
             case 'setDeviceState':
               return of({ on: true })
             case 'deleteDevice':

@@ -29,8 +29,6 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Cache } from 'cache-manager'
 
-// Controller for managing user devices, including CRUD operations and state management,
-// with caching for improved performance
 @ApiTags('devices')
 @Controller('user/:user_id/devices')
 @UseGuards(JwtAuthGuard, UserOwnershipGuard)
@@ -55,8 +53,17 @@ export class DevicesController {
     const cacheKey = `devices-${userId}${roomId ? `-room-${roomId}` : ''}`
     const cached = await this.cacheManager.get<Device[]>(cacheKey)
     if (cached) return cached
+
     const devices = await this.devicesService.getDevices(userId, roomId)
     await this.cacheManager.set(cacheKey, devices)
+    const trackingKey = `cache-keys-${userId}`
+    const existingKeys: string[] =
+      (await this.cacheManager.get(trackingKey)) || []
+    if (!existingKeys.includes(cacheKey)) {
+      existingKeys.push(cacheKey)
+      await this.cacheManager.set(trackingKey, existingKeys)
+    }
+
     return devices
   }
 
@@ -156,7 +163,11 @@ export class DevicesController {
   }
 
   private async invalidateDeviceCaches(userId: string) {
-    await this.cacheManager.del(`devices-${userId}`)
+    const trackingKey = `cache-keys-${userId}`
+    const keys: string[] = (await this.cacheManager.get(trackingKey)) || []
+
+    await Promise.all(keys.map((key) => this.cacheManager.del(key)))
+    await this.cacheManager.del(trackingKey)
     await this.cacheManager.del(`devices-fav-${userId}`)
   }
 }
