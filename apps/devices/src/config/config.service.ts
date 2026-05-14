@@ -9,6 +9,7 @@ type EnvSchema = {
   JWT_KEY: string
   JWT_ACCESS_TOKEN_TTL: string
   JWT_REFRESH_TOKEN_TTL: string
+  RABBITMQ_URL: string
 }
 
 @Injectable()
@@ -41,5 +42,9 @@ export class ConfigService {
 
   get JWT_REFRESH_TOKEN_TTL() {
     return this.configService.get('JWT_REFRESH_TOKEN_TTL') || '30d'
+  }
+
+  get RABBITMQ_URL() {
+    return this.configService.get('RABBITMQ_URL') || 'amqp://localhost:5672'
   }
 }

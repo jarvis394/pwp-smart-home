@@ -6,6 +6,7 @@
     "dev:front": "yarn nx run frontend:serve",
     "dev:backend": "yarn nx run backend:serve",
     "dev": "yarn nx run-many -t serve -p frontend devices backend --output-style stream",
+    "aux": "yarn nx serve auxiliary",
     "build:front": "yarn nx run frontend:build",
     "build:backend": "yarn nx run backend:build",
     "build:devices": "yarn nx run devices:build",

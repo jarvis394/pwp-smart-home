@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common'
+import { ClientProxy } from '@nestjs/microservices'
 import { AddDeviceReq } from '@smart-home/shared'
 import { Device, devices, User } from '@smart-home/db/schema'
 import { and, eq } from '@smart-home/db'
@@ -13,7 +14,8 @@ import { DrizzleAsyncProvider, Database } from '../db/drizzle.module'
 export class DevicesService {
   constructor(
     @Inject(DrizzleAsyncProvider)
-    private db: Database
+    private db: Database,
+    @Inject('AUXILIARY_SERVICE') private readonly alertsClient: ClientProxy
   ) {}
 
   serializeDevice(deviceDocument: Device): Device {
@@ -73,6 +75,9 @@ export class DevicesService {
     await this.db
       .delete(devices)
       .where(and(eq(devices.id, deviceId), eq(devices.userId, userId)))
+
+    this.alertsClient.emit('device.deleted', { userId, deviceId })
+
     return true
   }
 
@@ -95,6 +100,12 @@ export class DevicesService {
         })
         .where(and(eq(devices.id, deviceId), eq(devices.userId, userId)))
         .returning()
+    })
+
+    this.alertsClient.emit('device.favorite.changed', {
+      userId,
+      deviceId,
+      favorite: result?.favorite ?? false,
     })
 
     return result?.favorite ?? false
@@ -147,6 +158,12 @@ export class DevicesService {
       throw new InternalServerErrorException('Did not insert new device')
     }
 
+    this.alertsClient.emit('device.added', {
+      userId,
+      deviceId: result.id,
+      name: result.name,
+    })
+
     return this.serializeDevice(result)
   }
 
@@ -165,6 +182,8 @@ export class DevicesService {
     await this.updateDevice(userId, deviceId, {
       capabilities: device.capabilities,
     })
+
+    this.alertsClient.emit('device.state.changed', { userId, deviceId, on })
 
     return on
   }
