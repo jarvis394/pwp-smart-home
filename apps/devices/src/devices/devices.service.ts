@@ -72,6 +72,10 @@ export class DevicesService {
   }
 
   async delete(userId: User['id'], deviceId: Device['id']): Promise<boolean> {
+    const device = await this.getDevice(userId, deviceId)
+
+    if (!device) return false
+
     await this.db
       .delete(devices)
       .where(and(eq(devices.id, deviceId), eq(devices.userId, userId)))
@@ -102,11 +106,13 @@ export class DevicesService {
         .returning()
     })
 
-    this.alertsClient.emit('device.favorite.changed', {
-      userId,
-      deviceId,
-      favorite: result?.favorite ?? false,
-    })
+    if (result) {
+      this.alertsClient.emit('device.favorite.changed', {
+        userId,
+        deviceId,
+        favorite: result.favorite,
+      })
+    }
 
     return result?.favorite ?? false
   }
