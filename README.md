@@ -69,6 +69,15 @@ yarn db:studio
 If you do not have Docker installed and want to run it on a local machine instead:
 
 * Download Postgresql and install on your local machine before continuing to the next stage. During Postgresql software installation, set a strong password and use the same password in your .env file
+> [!IMPORTANT]
+> You need to update `.env` file with your PostgreSQL connection details to continue. Most importantly, you need to define `POSTGRES_URL`, but you can always start with copying the template:
+>
+> ```bash
+> cat .env.template > .env
+> # Update the variables in .env if you use your own Postgres instance
+> # Remember to make sure your RABBITMQ_URL variable is correct. for example RABBITMQ_URL=amqp://guest:guest@localhost:5672
+> ```
+
 * Click on start menu and find `pgAdmin` which is postgre Web GUI. Open it and click on the current server to connect.Enter the password (postgres) from the during installation to  connect successfully.
 * Right-click on Databases and  click on Create - Database. Enter  `smart_home` as the database and click on save.
 * CD (Change directory) to the proect direct and follow the steps below
@@ -134,10 +143,52 @@ For running tests with coverage, use
 yarn test --coverage
 ```
 
-3. A coverage test report will be generated at `apps/backend/coverage/index.html`
+3. A coverage test report will be generated at `apps/backend/coverage/index.html`. Simply use the command below to view the report
+
+```bash
+Start-Process "apps\backend\coverage\index.html"
+```
 
 [NOTE!]
 Testing was kept simple in the Devices module. This is because the RabbitMQ message broker uses a ClientProxy to communicate with the Device module, and it will require a RabbitMQ instance and separate Device microservice to be simultaneously active during tests. Authentication was still verified in all device endpoints.
+
+
+## Auxiliary Service
+The implemented Auxiliary service is for auditing purpose, a log of device operations.
+
+### Running the auxiliary service
+To run the auxiliary service, run the command
+
+```bash
+yarn aux
+```
+The service starts and creates a log file `alerts.log` after the first device operation and stores the log of device operations going forward.
+
+To read the event log live, run the command below on a separate terminal
+
+```bash
+Get-Content -Path alerts.log -Wait
+```
+
+### Testing the Auxiliary service
+
+The auxiliary service tests can be done by using the general test command which generates test report of all applications
+
+```bash
+yarn test --coverage
+```
+
+Or use the command bbelow for only auxiliary service
+
+```bash
+yarn nx test auxiliary --coverage
+```
+
+Whichever command is used, the report can be viewed in an html document by using the command
+
+```bash
+Start-Process "apps/auxiliary/coverage/index.html"
+```
 
 
 ### Dependencies
