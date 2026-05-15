@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {
-  BasicDevice,
-  DeviceCapabilities,
-  DeviceState,
-  DeviceType,
-} from '@smart-home/db'
+import { DeviceCapabilities, DeviceState, DeviceType } from '@smart-home/db'
 
-export class Device implements BasicDevice {
+export class Device {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   id: string
 
@@ -28,8 +23,9 @@ export class Device implements BasicDevice {
   @ApiProperty({
     example: 'Xiaomi TL-45',
     description: 'The specific hardware model',
+    required: false,
   })
-  model: string
+  model?: string | null
 
   @ApiProperty({
     example: 'Light',
@@ -44,5 +40,5 @@ export class Device implements BasicDevice {
     description: 'The ID of the room where this device is located',
     required: false,
   })
-  roomId?: string
+  roomId?: string | null
 }

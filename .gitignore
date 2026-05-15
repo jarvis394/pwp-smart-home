@@ -42,9 +42,12 @@ Thumbs.db
 uploads
 postgres
 .nx
+*.log
 
 mongo-entrypoint
 /generated/prisma
 
 libs/database/generated/prisma
 apps/backend/coverage
+coverage
+apps/auxiliary/coverage

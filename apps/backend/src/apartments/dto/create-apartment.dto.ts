@@ -7,7 +7,10 @@ export class CreateApartmentDto {
   @IsNotEmpty({ message: 'Apartment name or alias' })
   name: string
 
-  @ApiProperty({ description: 'City/area where the apartment is located', example: 'Oulu' })
+  @ApiProperty({
+    description: 'City/area where the apartment is located',
+    example: 'Oulu',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Location is required' })
   location: string

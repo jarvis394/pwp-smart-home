@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { AddDeviceReq } from '@smart-home/shared'
 import { ClientProxy } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
 import { Device } from '@smart-home/db/schema'
+import { CreateDeviceDto } from './dto/create-device.dto'
+import { UpdateDeviceDto } from './dto/update-device.dto'
 
 @Injectable()
 export class DevicesService {
@@ -10,9 +11,9 @@ export class DevicesService {
     @Inject('DEVICES_SERVICE') private readonly client: ClientProxy
   ) {}
 
-  async getDevices(userId: string): Promise<Device[]> {
+  async getDevices(userId: string, roomId?: string): Promise<Device[]> {
     return await firstValueFrom(
-      this.client.send({ cmd: 'getDevices' }, { userId })
+      this.client.send({ cmd: 'getDevices' }, { userId, roomId })
     )
   }
 
@@ -28,29 +29,40 @@ export class DevicesService {
     )
   }
 
-  async toggleFavorite(userId: string, deviceId: string): Promise<boolean> {
-    return await firstValueFrom(
+  async toggleFavorite(
+    userId: string,
+    deviceId: string
+  ): Promise<{ favorite: boolean }> {
+    const { state } = await firstValueFrom(
       this.client.send({ cmd: 'toggleFavoriteDevice' }, { userId, deviceId })
     )
+    return { favorite: state }
   }
 
-  async toggleOnOff(userId: string, deviceId: string): Promise<boolean> {
+  async setState(
+    userId: string,
+    deviceId: string,
+    on: boolean
+  ): Promise<{ on: boolean }> {
     return await firstValueFrom(
-      this.client.send({ cmd: 'toggleOnOffDevice' }, { userId, deviceId })
+      this.client.send({ cmd: 'setDeviceState' }, { userId, deviceId, on })
     )
   }
 
-  async addDevice(userId: string, data: AddDeviceReq): Promise<Device> {
+  async addDevice(userId: string, data: CreateDeviceDto): Promise<Device> {
     const result: Device = await firstValueFrom(
-      this.client.send(
-        { cmd: 'addDevice' },
-        {
-          userId,
-          data,
-        }
-      )
+      this.client.send({ cmd: 'addDevice' }, { userId, data })
     )
-
     return result
+  }
+
+  async updateDevice(
+    userId: string,
+    deviceId: string,
+    data: UpdateDeviceDto
+  ): Promise<Device> {
+    return firstValueFrom(
+      this.client.send({ cmd: 'updateDevice' }, { userId, deviceId, data })
+    )
   }
 }

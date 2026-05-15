@@ -24,8 +24,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { LoginDto } from './dto/login.dto'
+import { Request as ExpressRequest } from 'express'
 
-export interface RequestWithUser extends Request {
+export interface RequestWithUser extends ExpressRequest {
   user: {
     userId: string
     email: string

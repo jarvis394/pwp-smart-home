@@ -8,76 +8,160 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager'
 describe('Devices (e2e)', () => {
   let app: INestApplication
   let token: string
+  let userId: string
+
+  const NON_EXISTENT_USER_ID = '00000000-0000-0000-0000-000000000000'
+
+  const mockDevice = {
+    id: 'mock-1',
+    name: 'Mock Device',
+    model: 'Mock Model',
+    type: 'Light',
+    favorite: false,
+    state: 'ONLINE',
+    capabilities: {},
+    userId: '',
+    roomId: null,
+  }
 
   beforeAll(async () => {
-    //createTestingModule() method takes module metadats and returns a Testing Module instance
-    //For unit tests, the method used is compile(), which is asynchronous.
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
       .overrideProvider('DEVICES_SERVICE')
       .useValue({
         send: jest.fn().mockImplementation((pattern) => {
-          if (pattern.cmd === 'getDevices') {
-            return of({ devices: [{ id: 'mock-1', name: 'Mock Device' }] })
+          console.log('Mock send called with:', pattern)
+          switch (pattern.cmd) {
+            case 'getDevices':
+              return of([mockDevice])
+            case 'getFavoriteDevices':
+              return of([mockDevice])
+            case 'addDevice':
+              return of({ ...mockDevice, id: 'mock-new', name: 'New Device' })
+            case 'toggleFavoriteDevice':
+              return of({ state: true })
+            case 'setDeviceState':
+              return of({ on: true })
+            case 'deleteDevice':
+              return of(true)
+            default:
+              return of({})
           }
-          if (pattern.cmd === 'getFavoriteDevices') {
-            return of({ devices: [{ id: 'mock-1', name: 'Mock Device' }] })
-          }
-          return of({})
         }),
       })
       .compile()
 
-    //Nest is used to emulate HTTP request in e2e testing by using Supertest library
     app = moduleFixture.createNestApplication()
     app.setGlobalPrefix('api')
     app.useGlobalPipes(new ValidationPipe())
     await app.init()
 
-    const res = await request(app.getHttpServer())
+    const loginRes = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email: 'dl3@test.com', password: 'dl3test123' })
 
-    token = res.body.tokens.accessToken
+    token = loginRes.body.tokens.accessToken
+    userId = loginRes.body.user.id
   })
 
-  it('GET /api/devices - 401: unauthorized', async () => {
-    const res = await request(app.getHttpServer()).get('/api/devices')
-
+  it('GET /api/user/{user_id}/devices - 401: unauthorized', async () => {
+    const res = await request(app.getHttpServer()).get(
+      `/api/user/${userId}/devices`
+    )
     expect(res.status).toBe(401)
   })
 
-  it('GET /api/devices/favorites - 401: unauthorized', async () => {
-    const res = await request(app.getHttpServer()).get('/api/devices/favorites')
-
+  it('GET /api/user/{user_id}/favorites - 401: unauthorized', async () => {
+    const res = await request(app.getHttpServer()).get(
+      `/api/user/${userId}/favorites`
+    )
     expect(res.status).toBe(401)
   })
 
-  it('POST /api/devices/add - 401: unauthorized', async () => {
-    const res = await request(app.getHttpServer()).post('/api/devices/add')
-
-    expect(res.status).toBe(401)
-  })
-
-  it('GET /api/devices - 200: return list', async () => {
+  it('POST /api/user/{user_id}/devices - 401: unauthorized', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/devices')
+      .post(`/api/user/${userId}/devices`)
+      .send({ name: 'X', type: 'Light' })
+    expect(res.status).toBe(401)
+  })
+
+  it('DELETE /api/user/{user_id}/devices/{device_id} - 401: unauthorized', async () => {
+    const res = await request(app.getHttpServer()).delete(
+      `/api/user/${userId}/devices/mock-1`
+    )
+    expect(res.status).toBe(401)
+  })
+
+  it('GET /api/user/{user_id}/devices - 403: forbidden (different user)', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/user/${NON_EXISTENT_USER_ID}/devices`)
+      .set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(403)
+  })
+
+  it('GET /api/user/{user_id}/favorites - 403: forbidden (different user)', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/user/${NON_EXISTENT_USER_ID}/favorites`)
+      .set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(403)
+  })
+
+  it('GET /api/user/{user_id}/devices - 200: return list', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/user/${userId}/devices`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
-    expect(res.body).toHaveProperty('devices')
-    expect(Array.isArray(res.body.devices)).toBe(true)
+    expect(Array.isArray(res.body)).toBe(true)
+    expect(res.body[0].id).toBeDefined()
   })
 
-  it('GET /api/devices/favorites - 200: return favorites', async () => {
+  it('GET /api/user/{user_id}/favorites - 200: return favorites', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/devices/favorites')
+      .get(`/api/user/${userId}/favorites`)
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
-    expect(res.body).toHaveProperty('devices')
-    expect(Array.isArray(res.body.devices)).toBe(true)
+    expect(Array.isArray(res.body)).toBe(true)
+    expect(res.body[0].id).toBeDefined()
+  })
+
+  it('POST /api/user/{user_id}/devices - 201: add device', async () => {
+    const res = await request(app.getHttpServer())
+      .post(`/api/user/${userId}/devices`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Smart Bulb', type: 'Light', roomId: null })
+
+    expect(res.status).toBe(201)
+    expect(res.body.name).toBe('New Device')
+  })
+
+  it('PUT /api/user/{user_id}/devices/{device_id}/state?toggle=on - 200: toggle state', async () => {
+    const res = await request(app.getHttpServer())
+      .put(`/api/user/${userId}/devices/mock-1/state?toggle=on`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveProperty('on')
+  })
+
+  it('PUT /api/user/{user_id}/devices/{device_id}/favorite - 200: toggle favorite', async () => {
+    const res = await request(app.getHttpServer())
+      .put(`/api/user/${userId}/devices/mock-1/favorite`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.favorite).toBe(true)
+  })
+
+  it('DELETE /api/user/{user_id}/devices/{device_id} - 200: delete device', async () => {
+    const res = await request(app.getHttpServer())
+      .delete(`/api/user/${userId}/devices/mock-1`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.success).toBe(true)
   })
 
   afterAll(async () => {

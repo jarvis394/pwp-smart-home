@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { DevicesService } from './devices.service'
 import { DevicesController } from './devices.controller'
+import { UserFavoritesController } from './favorites.controller'
 import { ConfigService } from '../config/config.service'
 import { ClientProxyFactory, Transport } from '@nestjs/microservices'
 
@@ -19,13 +20,13 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices'
             urls: [config.RABBITMQ_URL],
             queue: 'devices_service_queue',
             queueOptions: {
-              durable: false,
+              durable: true,
             },
           },
         })
       },
     },
   ],
-  controllers: [DevicesController],
+  controllers: [DevicesController, UserFavoritesController],
 })
 export class DevicesModule {}

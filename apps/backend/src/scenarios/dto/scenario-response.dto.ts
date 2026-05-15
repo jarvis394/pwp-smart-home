@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsArray,
-  IsString,
-  IsUUID,
-} from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsArray, IsString } from 'class-validator'
 
 export class Scenario {
   @ApiProperty({

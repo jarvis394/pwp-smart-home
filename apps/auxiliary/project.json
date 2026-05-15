@@ -1,0 +1,54 @@
+{
+  "name": "auxiliary",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/auxiliary/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/auxiliary",
+        "main": "apps/auxiliary/src/main.ts",
+        "tsConfig": "apps/auxiliary/tsconfig.app.json",
+        "assets": ["apps/auxiliary/src/assets"],
+        "webpackConfig": "apps/auxiliary/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "auxiliary:build",
+        "inspect": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "auxiliary:build:development"
+        },
+        "production": {
+          "buildTarget": "auxiliary:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/auxiliary/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

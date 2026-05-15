@@ -26,7 +26,6 @@ export class ScenariosService {
       where: (fields, { eq, and }) =>
         and(eq(fields.id, id), eq(fields.userId, userId)),
     })
-
     if (!scenario) throw new NotFoundException('Scenario not found')
     return scenario
   }
@@ -39,45 +38,58 @@ export class ScenariosService {
       .insert(scenarios)
       .values({ ...data, userId })
       .returning()
-
     if (!result)
       throw new InternalServerErrorException('Failed to create scenario')
     return result
   }
 
   async update(
+    userId: string,
     id: string,
     data: Partial<Omit<NewScenario, 'userId'>>
   ): Promise<Scenario> {
+    const existing = await this.db.query.scenarios.findFirst({
+      where: (fields, { eq, and }) =>
+        and(eq(fields.id, id), eq(fields.userId, userId)),
+    })
+    if (!existing) throw new NotFoundException('Scenario not found')
+
     const [result] = await this.db
       .update(scenarios)
       .set(data)
       .where(eq(scenarios.id, id))
       .returning()
-
-    if (!result) throw new NotFoundException('Scenario not found')
+    if (!result)
+      throw new InternalServerErrorException('Failed to update scenario')
     return result
   }
 
-  async toggleActive(userId: string, id: string): Promise<Scenario> {
-    const scenario = await this.getById(userId, id)
-
+  async setActive(
+    userId: string,
+    id: string,
+    active: boolean
+  ): Promise<Scenario> {
+    await this.getById(userId, id)
     const [result] = await this.db
       .update(scenarios)
-      .set({ isActive: !scenario.isActive })
+      .set({ isActive: active })
       .where(eq(scenarios.id, id))
       .returning()
-
     if (!result) throw new NotFoundException('Scenario not found')
     return result
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(userId: string, id: string): Promise<boolean> {
+    const existing = await this.db.query.scenarios.findFirst({
+      where: (fields, { eq, and }) =>
+        and(eq(fields.id, id), eq(fields.userId, userId)),
+    })
+    if (!existing) throw new NotFoundException('Scenario not found')
+
     const [result] = await this.db
       .delete(scenarios)
       .where(eq(scenarios.id, id))
       .returning()
-
     if (!result) throw new NotFoundException('Scenario not found')
     return true
   }

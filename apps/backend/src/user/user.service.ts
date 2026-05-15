@@ -6,6 +6,7 @@ import {
   NotFoundException,
   Inject,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { compare, hash } from 'bcryptjs'
 import { ConfigService } from '../config/config.service'
@@ -84,13 +85,13 @@ export class UserService {
     const user = await this.findByEmail(email)
 
     if (!user) {
-      throw new Error('User not found')
+      throw new UnauthorizedException('Invalid email or password')
     }
 
     const passwordMatch = await compare(password, user.password)
 
     if (!passwordMatch) {
-      throw new Error('Invalid credentials')
+      throw new UnauthorizedException('Invalid email or password')
     }
 
     return user
@@ -105,7 +106,7 @@ export class UserService {
     if (existingUser) {
       throw new HttpException(
         'User with this email already exists',
-        HttpStatus.FORBIDDEN
+        HttpStatus.CONFLICT
       )
     }
 
@@ -149,9 +150,47 @@ export class UserService {
     userId: string,
     file: Express.Multer.File
   ): Promise<UserUploadAvatarRes> {
+    const user = await this.findById(userId)
     const url = await this.saveFileToUploads(file.buffer)
-    this.update(userId, { avatarUrl: url })
+    await this.update(userId, { avatarUrl: url })
+
+    if (user?.avatarUrl) {
+      const oldPath = path.join(
+        this.configService.UPLOADS_PATH,
+        path.basename(user.avatarUrl)
+      )
+      try {
+        await fs.unlink(oldPath)
+      } catch (err) {
+        this.logger.warn(`Could not delete old avatar: ${oldPath}`)
+      }
+    }
+
     return { avatarUrl: url }
+  }
+
+  async deleteAvatar(userId: string): Promise<void> {
+    const user = await this.findById(userId)
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+
+    await this.db
+      .update(users)
+      .set({ avatarUrl: null })
+      .where(eq(users.id, userId))
+
+    if (user.avatarUrl) {
+      const filePath = path.join(
+        this.configService.UPLOADS_PATH,
+        path.basename(user.avatarUrl)
+      )
+      try {
+        await fs.unlink(filePath)
+      } catch (err) {
+        this.logger.warn(`Could not delete old avatar file: ${filePath}`)
+      }
+    }
   }
 
   private async saveFileToUploads(buffer: Buffer): Promise<string> {

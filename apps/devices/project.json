@@ -25,7 +25,8 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "devices:build"
+        "buildTarget": "devices:build",
+        "inspect": false
       },
       "configurations": {
         "development": {
