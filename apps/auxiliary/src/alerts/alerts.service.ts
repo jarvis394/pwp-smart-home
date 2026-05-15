@@ -8,10 +8,7 @@ export class AlertsService {
   private readonly logFile = path.join(process.cwd(), 'alerts.log')
 
   private async write(message: string) {
-    const timestamp = new Date()
-      .toISOString()
-      .replace('T', ' ')
-      .substring(0, 19)
+    const timestamp = new Date().toLocaleString('sv-SE', { hour12: false })
     const line = `[${timestamp}] ${message}\n`
     this.logger.log(message)
     try {

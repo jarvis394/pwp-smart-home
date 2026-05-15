@@ -127,26 +127,21 @@ export class DevicesService {
         throw new ForbiddenException('User not found')
       }
 
-      const roomId = data.roomId
-      if (!roomId) {
-        throw new ForbiddenException('Room not found')
-      }
-
-      const room = await tx.query.rooms.findFirst({
-        where: (fields, { eq }) => eq(fields.id, roomId),
-      })
-
-      if (!room) {
-        throw new ForbiddenException('Room not found')
-      }
-
-      const apartment = await tx.query.apartments.findFirst({
-        where: (fields, { eq, and }) =>
-          and(eq(fields.id, room.apartmentId), eq(fields.userId, userId)),
-      })
-
-      if (!apartment) {
-        throw new ForbiddenException('Room does not belong to user')
+      if (data.roomId) {
+        const roomId = data.roomId
+        const room = await tx.query.rooms.findFirst({
+          where: (fields, { eq }) => eq(fields.id, roomId),
+        })
+        if (!room) {
+          throw new ForbiddenException('Room not found')
+        }
+        const apartment = await tx.query.apartments.findFirst({
+          where: (fields, { eq, and }) =>
+            and(eq(fields.id, room.apartmentId), eq(fields.userId, userId)),
+        })
+        if (!apartment) {
+          throw new ForbiddenException('Room does not belong to user')
+        }
       }
 
       const [inserted] = await tx
@@ -154,6 +149,7 @@ export class DevicesService {
         .values({
           userId,
           ...data,
+          roomId: data.roomId ?? null,
         })
         .returning()
 

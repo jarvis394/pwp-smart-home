@@ -166,8 +166,8 @@ export class DevicesController {
     const trackingKey = `cache-keys-${userId}`
     const keys: string[] = (await this.cacheManager.get(trackingKey)) || []
 
-    await Promise.all(keys.map((key) => this.cacheManager.del(key)))
-    await this.cacheManager.del(trackingKey)
-    await this.cacheManager.del(`devices-fav-${userId}`)
+    const allKeys = [...keys, trackingKey, `devices-fav-${userId}`]
+
+    await Promise.all(allKeys.map((key) => this.cacheManager.del(key)))
   }
 }

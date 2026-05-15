@@ -1,8 +1,15 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { IsString, IsOptional, IsUUID } from 'class-validator'
+import {
+  IsString,
+  IsOptional,
+  IsUUID,
+  IsBoolean,
+  IsObject,
+} from 'class-validator'
+import { DeviceCapabilities, DeviceState } from '@smart-home/db'
 
 export class UpdateDeviceDto {
-  @ApiPropertyOptional({ description: 'New name for the device' })
+  @ApiPropertyOptional({ description: 'New device name' })
   @IsOptional()
   @IsString()
   name?: string
@@ -17,8 +24,23 @@ export class UpdateDeviceDto {
   @IsString()
   type?: string
 
+  @ApiPropertyOptional({ description: 'Toggle favorite status' })
+  @IsOptional()
+  @IsBoolean()
+  favorite?: boolean
+
+  @ApiPropertyOptional({ description: 'Update device capabilities' })
+  @IsOptional()
+  @IsObject()
+  capabilities?: DeviceCapabilities
+
+  @ApiPropertyOptional({ description: 'Update device state' })
+  @IsOptional()
+  @IsObject()
+  state?: DeviceState
+
   @ApiPropertyOptional({
-    description: 'Move the device to a different room (room UUID)',
+    description: 'Move device to a different room (UUID)',
   })
   @IsOptional()
   @IsUUID()
