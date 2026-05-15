@@ -1,7 +1,0 @@
-[2026-05-15 13:37:26] DEVICE STATE CHANGED - Device: device-1 | User: user-1 | State: ON
-[2026-05-15 13:37:26] DEVICE STATE CHANGED - Device: device-1 | User: user-1 | State: OFF
-[2026-05-15 13:37:26] FAVORITE TOGGLED - Device: device-1 | User: user-1 | Favorite: true
-[2026-05-15 13:37:26] DEVICE ADDED - Device: "Kitchen Light" (device-1) | User: user-1
-[2026-05-15 13:37:26] DEVICE DELETED - Device ID: device-1 | User: user-1
-[2026-05-15 13:49:04] DEVICE ADDED - Device: "Kitchen Light" (5f2d30b1-c4d3-4ab9-bfd9-e183d921e775) | User: b5176a2e-9d66-49c5-8297-d32db28cea5e
-[2026-05-15 17:13:09] DEVICE ADDED - Device: "Kitchen Light" (67f111ba-274c-4fe2-a21d-8625effabb2e) | User: b5176a2e-9d66-49c5-8297-d32db28cea5e
