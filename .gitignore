@@ -48,3 +48,5 @@ mongo-entrypoint
 
 libs/database/generated/prisma
 apps/backend/coverage
+coverage
+apps/auxiliary/coverage
