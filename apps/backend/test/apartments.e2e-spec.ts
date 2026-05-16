@@ -34,7 +34,6 @@ describe('Apartments (e2e)', () => {
     userId = loginRes.body.user.id
   })
 
-  // ---------- CREATE ----------
   it('POST /api/user/{user_id}/apartments - 201: valid request', async () => {
     const res = await request(app.getHttpServer())
       .post(`/api/user/${userId}/apartments`)
