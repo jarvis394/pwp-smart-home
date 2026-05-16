@@ -1,3 +1,8 @@
+/**
+ * @file Services for handling Device properties
+ * In charge of device state management, favorites tracking, and room validation rules
+ * Interacts with Drizzle ORM and emits system events over RabbitMQ via Auxiliary Client
+ */
 import {
   ForbiddenException,
   Inject,

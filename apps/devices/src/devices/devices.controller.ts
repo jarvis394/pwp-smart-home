@@ -1,3 +1,8 @@
+/**
+ * @file Controller for handling Devices resource
+ * Listens to microservice MessagePattern requests for device operations
+ * Routes requests to DevicesService and returns structured response payloads
+ */
 import { Controller } from '@nestjs/common'
 import { MessagePattern, Payload } from '@nestjs/microservices'
 import { DevicesService } from './devices.service'

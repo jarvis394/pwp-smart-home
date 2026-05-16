@@ -1,3 +1,8 @@
+/**
+ * @file Module for Devices resource
+ * Configures RabbitMQ microservice credentials under the Auxiliary Client provider
+ * Links devices controller and service together with the Drizzle database module
+ */
 import { Module } from '@nestjs/common'
 import { DevicesService } from './devices.service'
 import { DevicesController } from './devices.controller'
