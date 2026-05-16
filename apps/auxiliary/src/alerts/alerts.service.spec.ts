@@ -1,3 +1,8 @@
+/**
+ * @file Unit tests for AlertsService
+ * Uses Jest mocks on fs/promises to validate events format and write correctly
+ * Checks that state changes, favorites, additions, and deletions hit the log file
+ */
 import { Test, TestingModule } from '@nestjs/testing'
 import { AlertsService } from './alerts.service'
 import * as fsPromises from 'fs/promises'

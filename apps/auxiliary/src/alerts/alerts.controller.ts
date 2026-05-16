@@ -1,3 +1,8 @@
+/**
+ * @file Controller for handling device event alerts
+ * Listens to microservice event patterns like device state and favorite changes
+ * Passes the event over to AlertsService to log current event patterns
+ */
 import { Controller } from '@nestjs/common'
 import { EventPattern, Payload } from '@nestjs/microservices'
 import { AlertsService } from './alerts.service'

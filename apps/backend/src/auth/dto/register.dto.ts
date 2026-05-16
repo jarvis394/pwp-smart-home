@@ -1,3 +1,8 @@
+/**
+ * @file DTO for Register request inputs
+ * Data validation of Register properties
+ * Uses NestJS Swagger decorators for API documentation properties
+ */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { NewUser } from '@smart-home/db/schema'
 import { IsEmail, IsNotEmpty } from 'class-validator'
