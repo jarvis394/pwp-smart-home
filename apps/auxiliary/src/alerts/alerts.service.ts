@@ -1,3 +1,8 @@
+/**
+ * @file Handles Service for logging device alerts
+ * Register formatted device event messages into a local text log file
+ * Keeps track of user actions, device additions, and deletions with timestamps
+ */
 import { Injectable, Logger } from '@nestjs/common'
 import * as fs from 'fs/promises'
 import * as path from 'path'

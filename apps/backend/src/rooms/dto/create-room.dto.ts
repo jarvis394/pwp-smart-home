@@ -1,3 +1,7 @@
+/**
+ * @file DTO for Create Room
+ * Data validation reinforcement when user registers new room
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsString } from 'class-validator'
 

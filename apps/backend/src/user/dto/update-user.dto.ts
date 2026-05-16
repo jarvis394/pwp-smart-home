@@ -1,3 +1,7 @@
+/**
+ * @file DTO for User Update
+ * Data validation reinforcement when user updates an user
+ */
 import { IsOptional, IsString } from 'class-validator'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { UserUpdateReq } from '@smart-home/shared'

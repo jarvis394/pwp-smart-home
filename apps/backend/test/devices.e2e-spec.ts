@@ -1,3 +1,8 @@
+/**
+ * @file E2E tests for Devices endpoints
+ * Tests creating, reading, updating, and deleting devices
+ * Verifies that auth tokens and user ownership logic block bad requests
+ */
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import request from 'supertest'

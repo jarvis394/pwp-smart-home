@@ -1,3 +1,8 @@
+/**
+ * @file E2E tests for User profile endpoints
+ * Tests fetching user profile details, changing credentials, and updating info
+ * Verifies that profile avatar uploads and file system deletion flows work properly
+ */
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import request from 'supertest'
@@ -122,7 +127,6 @@ describe('User (e2e)', () => {
     expect(res.status).toBe(403)
   })
 
-  // ---------- UPDATE AVATAR ----------
   it('PUT /api/user/:user_id/avatar - 200: update avatar', async () => {
     const buffer = Buffer.from(
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
@@ -154,7 +158,6 @@ describe('User (e2e)', () => {
     expect(res.status).toBe(403)
   })
 
-  // ---------- DELETE AVATAR ----------
   it('DELETE /api/user/:user_id/avatar - 200: delete avatar', async () => {
     const res = await request(app.getHttpServer())
       .delete(`/api/user/${userId}/avatar`)

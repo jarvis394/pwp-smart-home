@@ -1,3 +1,8 @@
+/**
+ * @file Controller for handling Apartment resources
+ *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
+ * Security on HTTP routes are handled with JwtAuthGuard, OwnershipGuard and @ApiBearerAuth()
+ */
 import {
   Body,
   Controller,
@@ -48,6 +53,14 @@ export class ApartmentsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
+  /**
+   * List of apartments for an specific userId
+   * This method relies on Apartments service verification to handle ownership verification
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @returns {Promise<Apartment[]>} - List of apartment objects
+   */
   async getApartments(@Param('user_id') userId: string) {
     const cacheKey = ApartmentsController.getApartmentsCacheKey(userId)
     const cached = await this.cacheManager.get(cacheKey)
@@ -71,6 +84,14 @@ export class ApartmentsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
   @ApiResponse({ status: 404, description: 'Apartment not found' })
+  /**
+   * Gets a single specific apartment for an specific userId
+   * This method relies on Apartments Service verification to handle the ownership verification
+   * @async
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} apartmentId - UUID value for the apartment
+   * @returns {Promise<Apartment>} - Single Apartment object
+   */
   async getById(
     @Param('user_id') userId: string,
     @Param('apartment_id') apartmentId: string
@@ -90,6 +111,15 @@ export class ApartmentsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
+  /**
+   * Creates a new Apartment for an specific userId.
+   * It calls the respective DTO object and relies on Apartments Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @param {CreateApartmentDTO} data - DTO for Apartment creation
+   * @returns {Promise<Apartment>} - Single apartment creation object
+   */
   async create(
     @Param('user_id') userId: string,
     @Body() body: CreateApartmentDto
@@ -109,6 +139,16 @@ export class ApartmentsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
   @ApiResponse({ status: 404, description: 'Apartment not found' })
+  /**
+   * Updates an Apartment for an specific userId.
+   * It calls the respective DTO object and relies on Apartments Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @param {string} apartmentId - UUID value for the apartment
+   * @param {UpdateApartmentDTO} data - DTO for apartment update
+   * @returns {Promise<Apartment>} - Single apartment update object
+   */
   async update(
     @Param('user_id') userId: string,
     @Param('apartment_id') apartmentId: string,
@@ -133,6 +173,15 @@ export class ApartmentsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
   @ApiResponse({ status: 404, description: 'Apartment not found' })
+  /**
+   * Deletes a specific Apartment for an specific userId.
+   * Relies on Apartment Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @param {string} apartmentId - UUID value for the apartment
+   * @returns {Promise<boolean>} - True if successful
+   */
   async delete(
     @Param('user_id') userId: string,
     @Param('apartment_id') apartmentId: string

@@ -1,3 +1,8 @@
+/**
+ * @file Services for handling Scenario resources
+ * In charge of handling security rules regarding ownership
+ * Uses Drizzle ORM for CRUD operations
+ */
 import {
   Injectable,
   Inject,
@@ -15,12 +20,26 @@ export class ScenariosService {
     private db: Database
   ) {}
 
+  /**
+   * Gets a list of scenarios and verifies ownership
+   * @async
+   * @param {string} userId - UUID credentials of the scenario owner
+   * @returns {Promise<Scenario[]>} - Array objects of scenarios
+   */
   async getScenarios(userId: string): Promise<Scenario[]> {
     return await this.db.query.scenarios.findMany({
       where: (fields, { eq }) => eq(fields.userId, userId),
     })
   }
 
+  /**
+   * Gets a single scenario based on userId and id
+   * @async
+   * @param {string} userId - UUID credentials of the scenario owner
+   * @param {string} id - single UUID scenario credential
+   * @throws {NotFoundException} - In case Scenario is not found
+   * @returns {Promise<Scenario>} - Single scenario object
+   */
   async getById(userId: string, id: string): Promise<Scenario> {
     const scenario = await this.db.query.scenarios.findFirst({
       where: (fields, { eq, and }) =>
@@ -30,6 +49,14 @@ export class ScenariosService {
     return scenario
   }
 
+  /**
+   * Creates an scenario after verifying ownership
+   * @async
+   * @param {string} userId - UUID credentials of the scenario owner
+   * @param {Omit<NewScenario, 'userId'>} data - Scenario details (name, etc.)
+   * @throws {InternalServerErrorException} - Exception in case the database cannot return scenario object
+   * @returns {Promise<Scenario>} - Created scenario object
+   */
   async create(
     userId: string,
     data: Omit<NewScenario, 'userId'>
@@ -43,6 +70,16 @@ export class ScenariosService {
     return result
   }
 
+  /**
+   * Updates scenario details after verifying ownership
+   * @async
+   * @param {string} userId - UUID credentials of the scenario owner
+   * @param {string} id - single UUID for scenario
+   * @param {Partial<Omit<NewScenario, 'userId'>>} data - Scenario details to be updated (name, etc.)
+   * @throws {InternalServerErrorException} - Exception in case the database cannot return the scenario object
+   * @throws {NotFoundException} - Exception in case the database cannot find the scenario object
+   * @returns {Promise<Scenario>} - Updated scenario object
+   */
   async update(
     userId: string,
     id: string,
@@ -64,6 +101,15 @@ export class ScenariosService {
     return result
   }
 
+  /**
+   * Sets an scenario status active after verifying ownership
+   * @async
+   * @param {string} userId - UUID credentials of the scenario owner
+   * @param {string} id - single UUID for scenario
+   * @param {string} active - Boolean status
+   * @throws {NotFoundException} - Exception in case the scenario object is not found
+   * @returns {Promise<boolean>} - Confirmation if scenario status was set
+   */
   async setActive(
     userId: string,
     id: string,
@@ -79,6 +125,14 @@ export class ScenariosService {
     return result
   }
 
+  /**
+   * Deletes scenario details after verifying ownership
+   * @async
+   * @param {string} userId - UUID credentials of the scenario owner
+   * @param {string} id - single UUID for scenario
+   * @throws {NotFoundException} - Exception in case the scenario object is not found
+   * @returns {Promise<boolean>} - Confirmation if apartment was deleted, otherwise Not Found
+   */
   async delete(userId: string, id: string): Promise<boolean> {
     const existing = await this.db.query.scenarios.findFirst({
       where: (fields, { eq, and }) =>

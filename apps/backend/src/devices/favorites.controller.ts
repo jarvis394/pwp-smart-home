@@ -1,3 +1,9 @@
+/**
+ * @file Controller for handling favorite Device
+ *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
+ * Security on HTTP routes are handled with JwtAuthGuard, UserOwnershipGuard and @ApiBearerAuth()
+ */
+
 import { Controller, Get, Inject, Param, UseGuards } from '@nestjs/common'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Cache } from 'cache-manager'

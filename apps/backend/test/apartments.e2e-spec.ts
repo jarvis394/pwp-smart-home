@@ -1,3 +1,8 @@
+/**
+ * @file E2E tests for Apartments endpoints
+ * Tests creating, reading, updating, and deleting apartments
+ * Verifies that auth tokens and user ownership logic block bad requests
+ */
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import request from 'supertest'
@@ -29,7 +34,6 @@ describe('Apartments (e2e)', () => {
     userId = loginRes.body.user.id
   })
 
-  // ---------- CREATE ----------
   it('POST /api/user/{user_id}/apartments - 201: valid request', async () => {
     const res = await request(app.getHttpServer())
       .post(`/api/user/${userId}/apartments`)

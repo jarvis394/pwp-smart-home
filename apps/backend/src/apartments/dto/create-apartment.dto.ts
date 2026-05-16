@@ -1,3 +1,7 @@
+/**
+ * @file DTO for Create Apartment
+ * Data validation reinforcement when user registers new apartment
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsString } from 'class-validator'
 

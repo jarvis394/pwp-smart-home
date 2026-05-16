@@ -1,3 +1,9 @@
+/**
+ * @file Controller for handling Room resources
+ *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
+ * Security on HTTP routes are handled with JwtAuthGuard, UserOwnershipGuard and @ApiBearerAuth()
+ */
+
 import {
   Body,
   Controller,
@@ -61,6 +67,14 @@ export class RoomsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
+  /**
+   * List of rooms for an specific userId with optional filters
+   * @async
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} [apartmentId] - Additional filter (optional) for a specific apartment
+   * @param {string} [location] - Additional filter (optional) for a specific location
+   * @returns {Promise<Room[]>} - List of room objects
+   */
   async getRooms(
     @Param('user_id') userId: string,
     @Query('apartment') apartmentId?: string,
@@ -94,6 +108,14 @@ export class RoomsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
   @ApiResponse({ status: 404, description: 'Room not found' })
+  /**
+   * Gets a single specific room for an specific userId
+   * This method relies on Rooms Service verification to handle the room ownership verification
+   * @async
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} roomId - UUID value for the room
+   * @returns {Promise<Room>} - Single Room object
+   */
   async getById(
     @Param('user_id') userId: string,
     @Param('room_id') roomId: string
@@ -120,6 +142,16 @@ export class RoomsController {
     description:
       'Forbidden – user_id mismatch or apartment does not belong to user',
   })
+  /**
+   * Creates a new Room for an specific userId on a single specific apartmentId.
+   * It calls the respective DTO object and relies on Rooms Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} apartmentId - UUID value for the apartment
+   * @param {CreateDTO} data - DTO for Room creation
+   * @returns {Promise<Room>} - Single room creation object
+   */
   async create(
     @Param('user_id') userId: string,
     @Query('apartment') apartmentId: string,
@@ -137,6 +169,16 @@ export class RoomsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
   @ApiResponse({ status: 404, description: 'Room not found' })
+  /**
+   * Updates a new Room for an specific userId.
+   * It calls the respective DTO object and relies on Rooms Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} [roomId] - UUID value for the room
+   * @param {UpdateDTO} data - DTO for Room update
+   * @returns {Promise<Room>} - Single room update object
+   */
   async update(
     @Param('user_id') userId: string,
     @Param('room_id') roomId: string,
@@ -154,6 +196,15 @@ export class RoomsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden – user_id mismatch' })
   @ApiResponse({ status: 404, description: 'Room not found' })
+  /**
+   * Deletes a specific Room for an specific userId.
+   * It calls the respective DTO object and relies on Rooms Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} [roomId] - UUID value for the room
+   * @returns {Promise<boolean>} - True if successful
+   */
   async delete(
     @Param('user_id') userId: string,
     @Param('room_id') roomId: string
@@ -163,6 +214,14 @@ export class RoomsController {
     return { success: true }
   }
 
+  /**
+   * Invalidates all Room caches for an specific userId
+   * Called every time a room is created, deleted or updated to verify data consistency
+   * @private
+   * @async
+   * @param {string} userId - UUID identifier of user that needs the cache clearing
+   * @returns {Promise<void>}
+   */
   private async invalidateRoomCaches(userId: string) {
     const trackingKey = `cache-keys-${userId}`
     const keys: string[] = (await this.cacheManager.get(trackingKey)) || []

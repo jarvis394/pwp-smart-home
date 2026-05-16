@@ -1,3 +1,8 @@
+/**
+ * @file DTO for User Response
+ * Data validation of User properties
+ * Uses NestJS Swagger decorators for API documentation properties
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsString, IsUrl, IsOptional } from 'class-validator'
 

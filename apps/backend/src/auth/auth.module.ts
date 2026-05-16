@@ -1,3 +1,8 @@
+/**
+ * @file Module for Auth resource
+ * Connects authentication strategies, JWT configuration, and the AuthController
+ * Imports UserModule to validate users and exports AuthService for the rest of the app
+ */
 import { Module } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { UserModule } from '../user/user.module'

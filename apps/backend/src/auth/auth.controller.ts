@@ -1,3 +1,8 @@
+/**
+ * @file Controller for handling Auth resources
+ *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
+ * Security on HTTP routes are handled with JwtAuthGuard and @ApiBearerAuth()
+ */
 import {
   Controller,
   Post,
@@ -53,6 +58,14 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized - wrong email or password',
   })
+  /**
+   * Handles user login
+   * Uses LocalAuthGuard validation to send user fields for object request
+   * @async
+   * @param {RequestWithUser} req - Request object with verified user credentials
+   * @param {LoginDto} _data - DTO with login fields (checked by guard)
+   * @returns {Promise<UserLoginRes>} - User object with access and refresh token
+   */
   async login(
     @Request() req: RequestWithUser,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -73,6 +86,13 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized request - invalid token',
   })
+  /**
+   * Handles user logout
+   * Uses JwtAuthGuard validation to delete session details
+   * @async
+   * @param {RequestWithUser} req - Request object with verified user credentials
+   * @returns {Promise<void>}
+   */
   async logout(@Request() req: RequestWithUser) {
     return await this.authService.logout(req.user.userId)
   }
@@ -88,6 +108,13 @@ export class AuthController {
     description: 'Bad request - invalid email format',
   })
   @ApiResponse({ status: 409, description: 'Email already in use' })
+  /**
+   * Register new user information
+   * Receive user properties to create parameters for the DTO
+   * @async
+   * @param {RegisterDto} registerDto - DTO with user parameter fields
+   * @returns {Promise<UserRegisterRes>} - New user registrated object
+   */
   async register(
     @Body() { email, firstName, lastName, password, avatarUrl }: RegisterDto
   ): Promise<UserRegisterRes> {
@@ -115,6 +142,13 @@ export class AuthController {
     status: 400,
     description: 'Unauthorized - Refresh token expired or invalid',
   })
+  /**
+   * Refresh access token credentials using token history
+   * Uses JwtPayload to validate refresh payload
+   * @async
+   * @param {RequestWithJwtPayload} req - Request with validated token information
+   * @returns {Promise<TokenResponse>} - Object properties with new access and refresh token strings
+   */
   async refreshTokens(@Req() req: RequestWithJwtPayload) {
     const userId = req.user.sub
     const refreshToken = req.user.refreshToken

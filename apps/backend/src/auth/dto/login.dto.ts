@@ -1,3 +1,8 @@
+/**
+ * @file DTO for Login request inputs
+ * Data validation of Login properties
+ * Uses NestJS Swagger decorators for API documentation properties
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { User } from '@smart-home/db/schema'
 import { IsEmail, IsNotEmpty } from 'class-validator'

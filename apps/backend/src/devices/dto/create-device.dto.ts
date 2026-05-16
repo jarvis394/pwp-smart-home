@@ -1,3 +1,7 @@
+/**
+ * @file DTO for Create Device
+ * Data validation reinforcement when user registers new device
+ */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import {
   IsString,

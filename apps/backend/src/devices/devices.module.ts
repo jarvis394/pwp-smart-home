@@ -1,3 +1,8 @@
+/**
+ * @file Module for Devices resource
+ * Sets up RabbitMQ client microservice configurations for device tracking
+ * Links devices controller and UserFavoritesController with other services so other modules can use it
+ */
 import { Module } from '@nestjs/common'
 import { DevicesService } from './devices.service'
 import { DevicesController } from './devices.controller'

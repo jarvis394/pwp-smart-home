@@ -1,3 +1,8 @@
+/**
+ * @file DTO for Scenario Response
+ * Data validation of Scenario properties
+ * Uses NestJS Swagger decorators for API documentation properties
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsBoolean, IsNotEmpty, IsArray, IsString } from 'class-validator'
 

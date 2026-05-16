@@ -1,3 +1,7 @@
+/**
+ * @file DTO for Update Scenario
+ * Data validation reinforcement when user updates a scenario
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsArray, IsOptional, IsString } from 'class-validator'
 

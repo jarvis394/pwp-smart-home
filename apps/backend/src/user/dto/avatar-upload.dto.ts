@@ -1,3 +1,8 @@
+/**
+ * @file DTO for Avatar Upload
+ * Data validation of Avatar properties
+ * Uses NestJS Swagger decorators for API documentation properties
+ */
 import { ApiProperty } from '@nestjs/swagger'
 
 class AvatarUploadDto {

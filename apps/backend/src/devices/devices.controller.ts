@@ -1,3 +1,8 @@
+/**
+ * @file Controller for handling Device resources
+ *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
+ * Security on HTTP routes are handled with JwtAuthGuard, UserOwnershipGuard and @ApiBearerAuth()
+ */
 import {
   Body,
   Controller,
@@ -46,6 +51,15 @@ export class DevicesController {
   })
   @ApiQuery({ name: 'room', required: false })
   @ApiResponse({ status: 200, type: Device, isArray: true })
+  /**
+   * List of devices for an specific userId
+   * This method relies on Devices Service verification to handle ownership verification
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the device owner
+   * @param {string} roomId - UUID credentials of the room owner
+   * @returns {Promise<Device[]>} - List of device objects
+   */
   async getDevices(
     @Param('user_id') userId: string,
     @Query('room') roomId?: string
@@ -71,6 +85,15 @@ export class DevicesController {
   @ApiOperation({ summary: 'Get a single device' })
   @ApiResponse({ status: 200, type: Device })
   @ApiResponse({ status: 404, description: 'Device not found' })
+  /**
+   * Gets a single specific device for an specific userId
+   * This method relies on Devices Service verification to handle the ownership verification
+   * @async
+   * @param {string} userId - UUID credentials of the device owner
+   * @param {string} deviceId - UUID value for the device
+   * @throws {NotFoundException} - In case Device is not found
+   * @returns {Promise<Device>} - Single Device object
+   */
   async getDevice(
     @Param('user_id') userId: string,
     @Param('device_id') deviceId: string
@@ -87,6 +110,15 @@ export class DevicesController {
   @ApiOperation({ summary: 'Add a new device' })
   @ApiBody({ type: CreateDeviceDto })
   @ApiResponse({ status: 201, type: Device })
+  /**
+   * Creates a new Device for an specific userId.
+   * It calls the respective DTO object and relies on Device Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the device owner
+   * @param {CreateDeviceDTO} data - DTO for Device creation
+   * @returns {Promise<Device>} - Single device creation object
+   */
   async addDevice(
     @Param('user_id') userId: string,
     @Body() newDevice: CreateDeviceDto
@@ -102,6 +134,16 @@ export class DevicesController {
   @ApiResponse({ status: 200, type: Device })
   @ApiResponse({ status: 400, description: 'Validation failed' })
   @ApiResponse({ status: 404, description: 'Device not found' })
+  /**
+   * Updates a Device for an specific userId.
+   * It calls the respective DTO object and relies on Devices Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the device owner
+   * @param {string} deviceId - UUID value for the device
+   * @param {UpdateDeviceDTO} data - DTO for device update
+   * @returns {Promise<Device>} - Single device update object
+   */
   async updateDevice(
     @Param('user_id') userId: string,
     @Param('device_id') deviceId: string,
@@ -122,6 +164,15 @@ export class DevicesController {
     status: 200,
     schema: { type: 'object', properties: { favorite: { type: 'boolean' } } },
   })
+  /**
+   * Sets a specific deviceId as favorite.
+   * Relies on Device Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the device owner
+   * @param {string} deviceId - UUID value for the device
+   * @returns {Promise<boolean>} - True if set as favorite
+   */
   async toggleFavorite(
     @Param('user_id') userId: string,
     @Param('device_id') deviceId: string
@@ -135,6 +186,17 @@ export class DevicesController {
   @ApiOperation({ summary: 'Toggle power state' })
   @ApiQuery({ name: 'toggle', required: true, enum: ['on', 'off'] })
   @ApiResponse({ status: 200, description: 'State changed' })
+  /**
+   * Sets a specific state for an specific deviceId.
+   * Relies on Device Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the device owner
+   * @param {string} deviceId - UUID value for the device
+   * @param {string} toggle - on/off state
+   * @throws {BadRequestException} - if input is missing
+   * @returns {Promise<boolean>} - True if state is active
+   */
   async setState(
     @Param('user_id') userId: string,
     @Param('device_id') deviceId: string,
@@ -153,6 +215,15 @@ export class DevicesController {
   @Delete(':device_id')
   @ApiOperation({ summary: 'Delete a device' })
   @ApiResponse({ status: 200, description: 'Device deleted' })
+  /**
+   * Deletes a specific Device for an specific userId.
+   * Relies on Device Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the device owner
+   * @param {string} deviceId - UUID value for the device
+   * @returns {Promise<boolean>} - True if successful
+   */
   async deleteDevice(
     @Param('user_id') userId: string,
     @Param('device_id') deviceId: string

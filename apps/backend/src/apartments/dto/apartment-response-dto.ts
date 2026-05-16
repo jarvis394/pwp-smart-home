@@ -1,3 +1,8 @@
+/**
+ * @file DTO for Apartment Response
+ * Data validation of Apartment properties
+ * Uses NestJS Swagger decorators for API documentation properties
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator'
 
