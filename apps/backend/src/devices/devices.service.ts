@@ -76,7 +76,7 @@ export class DevicesService {
    * @param {string} userId - UUID credentials of the devices owner
    * @param {string} deviceId - single UUID for device
    * @param {string} on - Fetches if status is active
-   * @returns {Promise<on: boolean>} - Confirmation if scenario status was set
+   * @returns {Promise<{ on: boolean }>} - Confirmation if device status was set
    */
   async setState(
     userId: string,
