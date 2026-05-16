@@ -1,3 +1,8 @@
+/**
+ * @file E2E tests for Authentication endpoints
+ * Tests user registration, login flows, and token lifecycle states
+ * Makes sure fresh access tokens generate properly and logouts wipe sessions cleanly
+ */
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import request from 'supertest'
