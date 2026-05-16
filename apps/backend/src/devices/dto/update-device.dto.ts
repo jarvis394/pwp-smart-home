@@ -1,3 +1,7 @@
+/**
+ * @file DTO for Update Devices
+ * Data validation reinforcement when user updates a device
+ */
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import {
   IsString,

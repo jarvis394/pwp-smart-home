@@ -22,6 +22,7 @@ export class ApartmentsService {
 
   /**
    * Gets a list of apartments and verifies ownership
+   * @async
    * @param {string} userId - UUID credentials of the apartment owner
    * @returns {Promise<Apartment[]>} - Array objects of apartments
    */
@@ -33,6 +34,7 @@ export class ApartmentsService {
 
   /**
    * Gets a single apartment based on apartmentId and userId
+   * @async
    * @param {string} userId - UUID credentials of the apartment owner
    * @param {string} apartmentId - single UUID aparment credential
    * @throws {NotFoundException} - In case Apartment is not found
@@ -49,6 +51,7 @@ export class ApartmentsService {
 
   /**
    * Creates an apartment after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the apartment owner
    * @param {Omit<NewApartment, 'userId'>} data - Apartment details (name, etc.)
    * @throws {InternalServerErrorException} - Exception in case the database cannot return apartment object
@@ -70,6 +73,7 @@ export class ApartmentsService {
 
   /**
    * Updates apartment details after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the apartment owner
    * @param {string} id - single UUID for apartment
    * @param {Partial<Omit<NewApartment, 'userId'>>} data - Apartment details to be updated (name, etc.)
@@ -93,6 +97,7 @@ export class ApartmentsService {
 
   /**
    * Deletes apartment details after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the apartment owner
    * @param {string} id - single UUID for apartment
    * @throws {NotFoundException} - Exception in case the apartment object is not found

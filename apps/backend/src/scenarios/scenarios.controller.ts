@@ -1,7 +1,7 @@
 /**
  * @file Controller for handling Scenarios resources
  *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
- * Security on HTTP reoutes are handled with JwtAuthGuard and @ApiBearerAuth()
+ * Security on HTTP routes are handled with JwtAuthGuard, UserOwnershipGuard and @ApiBearerAuth()
  */
 import {
   Body,
@@ -146,7 +146,7 @@ export class ScenariosController {
    * Updates a Scenario for an specific userId.
    * It calls the respective DTO object and relies on Scenarios Service verification to handle the specific request
    * Helper method to clear cache is used to clean the cache request
-   * *@async
+   * @async
    * @param {string} userId - UUID credentials of the scenario owner
    * @param {string} scenarioId - UUID value for the scenario
    * @Body UpdateScenarioDTO - DTO for scenario update

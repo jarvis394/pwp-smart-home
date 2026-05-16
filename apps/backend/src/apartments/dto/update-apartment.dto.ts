@@ -1,3 +1,7 @@
+/**
+ * @file DTO for Update Apartment
+ * Data validation reinforcement when user updates an apartment
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsOptional, IsString } from 'class-validator'
 

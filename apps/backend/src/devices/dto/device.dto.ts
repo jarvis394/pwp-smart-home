@@ -1,3 +1,8 @@
+/**
+ * @file DTO for Device Response
+ * Data validation of Device properties
+ * Uses NestJS Swagger decorators for API documentation properties
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { DeviceCapabilities, DeviceState, DeviceType } from '@smart-home/db'
 

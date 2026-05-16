@@ -18,6 +18,7 @@ export class DevicesService {
 
   /**
    * Gets a list of devices
+   * @async
    * @param {string} userId - UUID credentials of the devices owner
    * @returns {Promise<Device[]>} - Array objects of devices
    */
@@ -29,6 +30,7 @@ export class DevicesService {
 
   /**
    * Gets a list of favorite devices
+   * @async
    * @param {string} userId - UUID credentials of the devices owner
    * @returns {Promise<Device[]>} - Array objects of devices
    */
@@ -40,6 +42,7 @@ export class DevicesService {
 
   /**
    * Deletes device details
+   * @async
    * @param {string} userId - UUID credentials of the device owner
    * @param {string} deviceId - single UUID for device
    * @returns {Promise<boolean>} - True if deleted
@@ -52,6 +55,7 @@ export class DevicesService {
 
   /**
    * Sets a singular state as favorite
+   * @async
    * @param {string} userId - UUID credentials of the devices owner
    * @param {string} deviceId - single UUID for device
    * @returns {Promise<Device>} - Device object status
@@ -68,6 +72,7 @@ export class DevicesService {
 
   /**
    * Sets an device state on or off
+   * @async
    * @param {string} userId - UUID credentials of the devices owner
    * @param {string} id - single UUID for devices
    * @param {string} on - Fetches if status is active
@@ -85,6 +90,7 @@ export class DevicesService {
 
   /**
    * Creates a device after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the device owner
    * @param {CreateDeviceDTO} data - DTO obhject to be updated
    * @returns {Promise<Device>} - Created device object
@@ -98,6 +104,7 @@ export class DevicesService {
 
   /**
    * Updates device details
+   * @async
    * @param {string} userId - UUID credentials of the device owner
    * @param {string} deviceId - single UUID for device
    * @param {UpdateDeviceDTO} data - DTO obhject to be updated

@@ -1,7 +1,7 @@
 /**
- * @file Controller for handling Scenario resources
+ * @file Controller for handling Device resources
  *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
- * Security on HTTP reoutes are handled with JwtAuthGuard and @ApiBearerAuth()
+ * Security on HTTP routes are handled with JwtAuthGuard, UserOwnershipGuard and @ApiBearerAuth()
  */
 import {
   Body,
@@ -138,7 +138,7 @@ export class DevicesController {
    * Updates a Device for an specific userId.
    * It calls the respective DTO object and relies on Devices Service verification to handle the specific request
    * Helper method to clear cache is used to clean the cache request
-   * *@async
+   * @async
    * @param {string} userId - UUID credentials of the device owner
    * @param {string} deviceId - UUID value for the device
    * @Body UpdateDeviceDTO - DTO for device update

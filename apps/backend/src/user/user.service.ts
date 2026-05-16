@@ -52,6 +52,7 @@ export class UserService {
 
   /**
    * Finds user details by email address
+   * @async
    * @param {string} email - user email
    * @returns {Promise<User>} - User credentials
    */
@@ -63,6 +64,7 @@ export class UserService {
 
   /**
    * Finds user details by Id
+   * @async
    * @param {string} id - UUID identifier for user
    * @returns {Promise<User>} - User credentials
    */
@@ -74,6 +76,7 @@ export class UserService {
 
   /**
    * Updates user fields
+   * @async
    * @param {string} id - UUID identifier for user
    * @param {Partial<User>} update - Object containing file to update
    * @returns {Promise<User>} - Updated user object from the database
@@ -89,6 +92,7 @@ export class UserService {
 
   /**
    * Updates user information
+   * @async
    * @param {string} id - UUID identifier for user
    * @param {UserUpdateReq} update - DTO for updating
    * @throws {NotFoundException} - If the user details cannot be found
@@ -135,6 +139,7 @@ export class UserService {
 
   /**
    * Handles new user registration, hashes password and saves information
+   * @async
    * @param {Omit<NewUser, 'devices'|'refreshToken'>} user - new user payload
    * @throws {HttpException} - In case user with same email already exists
    * @throws {InternalServerErrorException} - In case it fails to return the registration
@@ -259,6 +264,7 @@ export class UserService {
   /**
    * Process image uploads, converts it to WEBP format and stores in local file system
    * @private
+   * @async
    * @param {Buffer} buffer - Raw file buffer from uploaded multipart data
    * @throws {InternalServerErrorException} - If target directories cannot be found
    * @returns {Promise<string>} - Local server path URL pointing to the image

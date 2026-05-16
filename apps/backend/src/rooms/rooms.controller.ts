@@ -1,7 +1,7 @@
 /**
  * @file Controller for handling Room resources
  *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
- * Security on HTTP reoutes are handled with JwtAuthGuard and @ApiBearerAuth()
+ * Security on HTTP routes are handled with JwtAuthGuard, UserOwnershipGuard and @ApiBearerAuth()
  */
 
 import {
@@ -173,7 +173,7 @@ export class RoomsController {
    * Updates a new Room for an specific userId.
    * It calls the respective DTO object and relies on Rooms Service verification to handle the specific request
    * Helper method to clear cache is used to clean the cache request
-   * *@async
+   * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {string} [roomId] - UUID value for the room
    * @Body UpdateDTO - DTO for Room update
@@ -217,7 +217,7 @@ export class RoomsController {
   /**
    * Invalidates all Room caches for an specific userId
    * Called every time a room is created, deleted or updated to verify data consistency
-   * *@private
+   * @private
    * @async
    * @param {string} userId - UUID identifier of user that needs the cache clearing
    * @returns {Promise<void>}

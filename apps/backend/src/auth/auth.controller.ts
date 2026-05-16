@@ -1,7 +1,7 @@
 /**
  * @file Controller for handling Auth resources
  *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
- * Security on HTTP reoutes are handled with JwtAuthGuard and @ApiBearerAuth()
+ * Security on HTTP routes are handled with JwtAuthGuard and @ApiBearerAuth()
  */
 import {
   Controller,

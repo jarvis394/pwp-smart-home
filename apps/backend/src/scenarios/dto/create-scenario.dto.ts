@@ -1,3 +1,7 @@
+/**
+ * @file DTO for Create Scenario
+ * Data validation reinforcement when user registers new scenario
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsArray, IsString } from 'class-validator'
 

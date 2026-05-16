@@ -1,3 +1,8 @@
+/**
+ * @file DTO for Room Response
+ * Data validation of Room properties
+ * Uses NestJS Swagger decorators for API documentation properties
+ */
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsString } from 'class-validator'
 

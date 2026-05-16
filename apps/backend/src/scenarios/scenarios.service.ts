@@ -22,6 +22,7 @@ export class ScenariosService {
 
   /**
    * Gets a list of scenarios and verifies ownership
+   * @async
    * @param {string} userId - UUID credentials of the scenario owner
    * @returns {Promise<Scenario[]>} - Array objects of scenarios
    */
@@ -33,6 +34,7 @@ export class ScenariosService {
 
   /**
    * Gets a single scenario based on userId and id
+   * @async
    * @param {string} userId - UUID credentials of the scenario owner
    * @param {string} id - single UUID scenario credential
    * @throws {NotFoundException} - In case Scenario is not found
@@ -49,6 +51,7 @@ export class ScenariosService {
 
   /**
    * Creates an scenario after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the scenario owner
    * @param {Omit<NewScenario, 'userId'>} data - Scenario details (name, etc.)
    * @throws {InternalServerErrorException} - Exception in case the database cannot return scenario object
@@ -69,6 +72,7 @@ export class ScenariosService {
 
   /**
    * Updates scenario details after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the scenario owner
    * @param {string} id - single UUID for scenario
    * @param {Partial<Omit<NewScenario, 'userId'>>} data - Scenario details to be updated (name, etc.)
@@ -99,6 +103,7 @@ export class ScenariosService {
 
   /**
    * Sets an scenario status active after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the scenario owner
    * @param {string} id - single UUID for scenario
    * @param {string} active - Boolean status
@@ -122,6 +127,7 @@ export class ScenariosService {
 
   /**
    * Deletes scenario details after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the scenario owner
    * @param {string} id - single UUID for scenario
    * @throws {NotFoundException} - Exception in case the scenario object is not found

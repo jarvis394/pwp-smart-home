@@ -24,6 +24,7 @@ export class RoomsService {
 
   /**
    * Security helper methor to verify the ownership of a single apartment
+   * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {string} apartmentId - UUID value for the apartment
    * @throws {ForbiddenException} - In case apartment does not belong to the user or it is not found
@@ -44,6 +45,7 @@ export class RoomsService {
 
   /**
    * Gets a list of rooms, verifies ownership and additional filters
+   * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {Object} [filters] - Query filters
    * @param {string} [filters.apartmentId] - Query optional filter that targets a specific apartment
@@ -84,6 +86,7 @@ export class RoomsService {
 
   /**
    * Gets a single room based on roomId and userId
+   * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {string} roomId - single UUID room credential
    * @throws {NotFoundException} - In case Room is not found
@@ -102,6 +105,7 @@ export class RoomsService {
 
   /**
    * Creates a room after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {string} apartmentId - single UUID for apartment
    * @param {Omit<NewRoom, 'apartmentId'>} data - Room details (name, etc.)
@@ -126,6 +130,7 @@ export class RoomsService {
 
   /**
    * Updates room details after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {string} roomId - single UUID for room
    * @param {Partial<Omit<NewRoom, 'apartmentId'>>} data - Room details to be updated (name, etc.)
@@ -157,6 +162,7 @@ export class RoomsService {
 
   /**
    * Deletes room details after verifying ownership
+   * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {string} roomId - single UUID for room
    * @throws {NotFoundException} - Exception in case the room object is not found

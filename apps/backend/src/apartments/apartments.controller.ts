@@ -1,7 +1,7 @@
 /**
  * @file Controller for handling Apartment resources
  *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
- * Security on HTTP reoutes are handled with JwtAuthGuard and @ApiBearerAuth()
+ * Security on HTTP routes are handled with JwtAuthGuard, OwnershipGuard and @ApiBearerAuth()
  */
 import {
   Body,
@@ -143,7 +143,7 @@ export class ApartmentsController {
    * Updates an Apartment for an specific userId.
    * It calls the respective DTO object and relies on Apartments Service verification to handle the specific request
    * Helper method to clear cache is used to clean the cache request
-   * *@async
+   * @async
    * @param {string} userId - UUID credentials of the apartment owner
    * @param {string} apartmentId - UUID value for the apartment
    * @Body UpdateApartmentDTO - DTO for apartment update
