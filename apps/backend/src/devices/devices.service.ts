@@ -1,7 +1,7 @@
 /**
  * @file Services for handling Device resources
  * In charge of handling security rules regarding ownership
- * Uses Drizzle ORM for CRUD operations
+ * Uses a microservice client (DEVICES_SERVICE) to handle device CRUD operations
  */
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
@@ -74,9 +74,9 @@ export class DevicesService {
    * Sets an device state on or off
    * @async
    * @param {string} userId - UUID credentials of the devices owner
-   * @param {string} id - single UUID for devices
+   * @param {string} deviceId - single UUID for device
    * @param {string} on - Fetches if status is active
-   * @returns {Promise<boolean>} - Confirmation if scenario status was set
+   * @returns {Promise<on: boolean>} - Confirmation if scenario status was set
    */
   async setState(
     userId: string,
