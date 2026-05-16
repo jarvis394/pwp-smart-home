@@ -1,3 +1,9 @@
+/**
+ * @file Services for handling Room resources
+ * In charge of handling security rules regarding Apartment ownership
+ * Uses Drizzle ORM for CRUD operations
+ */
+
 import {
   Injectable,
   Inject,
@@ -16,6 +22,13 @@ export class RoomsService {
     private db: Database
   ) {}
 
+  /**
+   * Security helper methor to verify the ownership of a single apartment
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} apartmentId - UUID value for the apartment
+   * @throws {ForbiddenException} - In case apartment does not belong to the user or it is not found
+   * @returns {Promise<void>}
+   */
   private async verifyApartmentOwnership(
     apartmentId: string,
     userId: string
@@ -29,6 +42,14 @@ export class RoomsService {
     }
   }
 
+  /**
+   * Gets a list of rooms, verifies ownership and additional filters
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {Object} [filters] - Query filters
+   * @param {string} [filters.apartmentId] - Query optional filter that targets a specific apartment
+   * @param {string} [filters.locationId] - Query optional filter that targets a specific location
+   * @returns {Promise<Room[]>} - Array objects of rooms
+   */
   async getRooms(
     userId: string,
     filters?: { apartmentId?: string; location?: string }
@@ -61,6 +82,14 @@ export class RoomsService {
     return rows
   }
 
+  /**
+   * Gets a single room based on roomId and userId
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} roomId - single UUID room credential
+   * @throws {NotFoundException} - In case Room is not found
+   * @returns {Promise<Room>} - Single room object
+   */
+
   async getById(userId: string, roomId: string): Promise<Room> {
     const room = await this.db.query.rooms.findFirst({
       where: (fields, { eq }) => eq(fields.id, roomId),
@@ -71,6 +100,14 @@ export class RoomsService {
     return room
   }
 
+  /**
+   * Creates a room after verifying ownership
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} apartmentId - single UUID for apartment
+   * @param {Omit<NewRoom, 'apartmentId'>} data - Room details (name, etc.)
+   * @throws {InternalServerErrorException} - Exception in case the database cannot return room object
+   * @returns {Promise<Room>} - Created room object
+   */
   async create(
     userId: string,
     apartmentId: string,
@@ -87,6 +124,15 @@ export class RoomsService {
     return result
   }
 
+  /**
+   * Updates room details after verifying ownership
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} roomId - single UUID for room
+   * @param {Partial<Omit<NewRoom, 'apartmentId'>>} data - Room details to be updated (name, etc.)
+   * @throws {NotFoundException} - Exception in case the room object is not found
+   * @throws {InternalServerErrorException} - Exception in case the database cannot return room object
+   * @returns {Promise<Room>} - Updated room object
+   */
   async update(
     userId: string,
     roomId: string,
@@ -109,6 +155,13 @@ export class RoomsService {
     return result
   }
 
+  /**
+   * Deletes room details after verifying ownership
+   * @param {string} userId - UUID credentials of the room owner
+   * @param {string} roomId - single UUID for room
+   * @throws {NotFoundException} - Exception in case the room object is not found
+   * @returns {Promise<boolean>} - Confirmation if room was deleted, otherwise Not Found
+   */
   async delete(userId: string, roomId: string): Promise<boolean> {
     const room = await this.db.query.rooms.findFirst({
       where: (fields, { eq }) => eq(fields.id, roomId),

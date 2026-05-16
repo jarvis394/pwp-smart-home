@@ -1,3 +1,8 @@
+/**
+ * @file Services for handling User resources
+ * In charge of handling security rules regarding ownership
+ * Uses Drizzle ORM for CRUD operations
+ */
 import {
   Logger,
   Injectable,
@@ -45,18 +50,34 @@ export class UserService {
     }
   }
 
+  /**
+   * Finds user details by email address
+   * @param {string} email - user email
+   * @returns {Promise<User>} - User credentials
+   */
   async findByEmail(email: string) {
     return await this.db.query.users.findFirst({
       where: (fields, { eq }) => eq(fields.email, email),
     })
   }
 
+  /**
+   * Finds user details by Id
+   * @param {string} id - UUID identifier for user
+   * @returns {Promise<User>} - User credentials
+   */
   async findById(id: string) {
     return await this.db.query.users.findFirst({
       where: (fields, { eq }) => eq(fields.id, id),
     })
   }
 
+  /**
+   * Updates user fields
+   * @param {string} id - UUID identifier for user
+   * @param {Partial<User>} update - Object containing file to update
+   * @returns {Promise<User>} - Updated user object from the database
+   */
   async update(id: string, update: Partial<User>) {
     const [res] = await this.db
       .update(users)
@@ -66,6 +87,13 @@ export class UserService {
     return res
   }
 
+  /**
+   * Updates user information
+   * @param {string} id - UUID identifier for user
+   * @param {UserUpdateReq} update - DTO for updating
+   * @throws {NotFoundException} - If the user details cannot be found
+   * @returns {Promise<UserUpdateRes>} - Updated user details
+   */
   async updateInfo(
     userId: string,
     update: UserUpdateReq
@@ -81,6 +109,14 @@ export class UserService {
     }
   }
 
+  /**
+   * Validates a user's login against stored credentials
+   * @async
+   * @param {string} email -User email string
+   * @param {string} password - Raw password details
+   * @throws {UnauthorizedException} - In case authorization fails or fields are incorrect
+   * @returns {Promise<User>} - Authenticated user credentials
+   */
   async login(email: string, password: string): Promise<User> {
     const user = await this.findByEmail(email)
 
@@ -97,6 +133,13 @@ export class UserService {
     return user
   }
 
+  /**
+   * Handles new user registration, hashes password and saves information
+   * @param {Omit<NewUser, 'devices'|'refreshToken'>} user - new user payload
+   * @throws {HttpException} - In case user with same email already exists
+   * @throws {InternalServerErrorException} - In case it fails to return the registration
+   * @returns {Promise<User>} - New user object created
+   */
   async register(
     user: Omit<NewUser, 'devices' | 'refreshToken'>
   ): Promise<User> {
@@ -129,6 +172,12 @@ export class UserService {
     return result
   }
 
+  /**
+   * Hashes a text string for secure storage
+   * @async
+   * @param {string} text - Text string
+   * @returns {Promise<string>} - Generated hash string
+   */
   async hash(text: string): Promise<string> {
     const hashedText = await hash(text, 12)
     return hashedText
@@ -146,6 +195,13 @@ export class UserService {
     }
   }
 
+  /**
+   * Uploads/overrides an avatar picture for a single user profile, removing old files.
+   * @async
+   * @param {string} userId - UUID credentials of the user
+   * @param {Express.Multer.File} file - Incoming file matching multer payload specs.
+   * @returns {Promise<UserUploadAvatarRes>} - Payload updated active image path details
+   */
   async updateAvatar(
     userId: string,
     file: Express.Multer.File
@@ -169,6 +225,13 @@ export class UserService {
     return { avatarUrl: url }
   }
 
+  /**
+   * Deletes references to avatar URLs and removes associated files from local storage arrays.
+   * @async
+   * @param {string} userId - UUID credentials of the user
+   * @throws {NotFoundException} - In case avatar is not found
+   * @returns {Promise<void>} - Empty when success
+   */
   async deleteAvatar(userId: string): Promise<void> {
     const user = await this.findById(userId)
     if (!user) {
@@ -193,6 +256,13 @@ export class UserService {
     }
   }
 
+  /**
+   * Process image uploads, converts it to WEBP format and stores in local file system
+   * @private
+   * @param {Buffer} buffer - Raw file buffer from uploaded multipart data
+   * @throws {InternalServerErrorException} - If target directories cannot be found
+   * @returns {Promise<string>} - Local server path URL pointing to the image
+   */
   private async saveFileToUploads(buffer: Buffer): Promise<string> {
     const fileName = `${uuidv4()}.webp`
     const savePath = path.join(this.configService.UPLOADS_PATH, fileName)

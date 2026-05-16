@@ -1,3 +1,8 @@
+/**
+ * @file Services for handling Apartment resources
+ * In charge of handling security rules regarding ownership
+ * Uses Drizzle ORM for CRUD operations
+ */
 import {
   Injectable,
   Inject,
@@ -15,12 +20,24 @@ export class ApartmentsService {
     private db: Database
   ) {}
 
+  /**
+   * Gets a list of apartments and verifies ownership
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @returns {Promise<Apartment[]>} - Array objects of apartments
+   */
   async getApartments(userId: string): Promise<Apartment[]> {
     return await this.db.query.apartments.findMany({
       where: (fields, { eq }) => eq(fields.userId, userId),
     })
   }
 
+  /**
+   * Gets a single apartment based on apartmentId and userId
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @param {string} apartmentId - single UUID aparment credential
+   * @throws {NotFoundException} - In case Apartment is not found
+   * @returns {Promise<Apartment>} - Single apartment object
+   */
   async getById(userId: string, id: string): Promise<Apartment> {
     const apartment = await this.db.query.apartments.findFirst({
       where: (fields, { eq, and }) =>
@@ -30,6 +47,13 @@ export class ApartmentsService {
     return apartment
   }
 
+  /**
+   * Creates an apartment after verifying ownership
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @param {Omit<NewApartment, 'userId'>} data - Apartment details (name, etc.)
+   * @throws {InternalServerErrorException} - Exception in case the database cannot return apartment object
+   * @returns {Promise<Apartment>} - Created apartment object
+   */
   async create(
     userId: string,
     data: Omit<NewApartment, 'userId'>
@@ -44,6 +68,14 @@ export class ApartmentsService {
     return result
   }
 
+  /**
+   * Updates apartment details after verifying ownership
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @param {string} id - single UUID for apartment
+   * @param {Partial<Omit<NewApartment, 'userId'>>} data - Apartment details to be updated (name, etc.)
+   * @throws {InternalServerErrorException} - Exception in case the database cannot return apartment object
+   * @returns {Promise<Apartment>} - Updated apartment object
+   */
   async update(
     userId: string,
     id: string,
@@ -59,6 +91,13 @@ export class ApartmentsService {
     return result
   }
 
+  /**
+   * Deletes apartment details after verifying ownership
+   * @param {string} userId - UUID credentials of the apartment owner
+   * @param {string} id - single UUID for apartment
+   * @throws {NotFoundException} - Exception in case the apartment object is not found
+   * @returns {Promise<boolean>} - Confirmation if apartment was deleted, otherwise Not Found
+   */
   async delete(userId: string, id: string): Promise<boolean> {
     const [result] = await this.db
       .delete(apartments)

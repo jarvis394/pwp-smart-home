@@ -1,3 +1,8 @@
+/**
+ * @file Controller for handling User resources
+ *  Handles HTTP requests, input validators using NestJSS, and cache using NestJS/cache-manager
+ * Security on HTTP reoutes are handled with JwtAuthGuard and @ApiBearerAuth()
+ */
 import {
   Body,
   Controller,
@@ -66,6 +71,13 @@ export class UserController {
     status: 404,
     description: 'User not found',
   })
+  /**
+   * Gets a single user by Id
+   * This method relies on User Service verification to handle the ownership verification
+   * @async
+   * @param {string} userId - UUID credentials of the user
+   * @returns {Promise<UserGetSelfRes>} - User object in return
+   */
   async getUserById(
     @Param('user_id') user_id: string
   ): Promise<UserGetSelfRes> {
@@ -102,6 +114,14 @@ export class UserController {
     status: 401,
     description: 'Unauthorized - token missing or invalid',
   })
+  /**
+   * Updates user information
+   * Relies on User Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the user
+   * @returns {Promise<UserUpdateRes>} - User information updated
+   */
   async updateUser(
     @Param('user_id') user_id: string,
     @Body() update: UpdateUserDto
@@ -138,6 +158,15 @@ export class UserController {
     status: 403,
     description: 'Forbidden - Unauthorized access to upload avatar',
   })
+  /**
+   * Creates an avatar for a specific userId
+   * Relies on User Service verification to handle the specific request
+   * Validates max sixe and file type restricted to png, jpeg, jpg, webp
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the user
+   * @returns {Promise<UserUploadAvatarRes>} - Avatar object
+   */
   async createAvatar(
     @Param('user_id') user_id: string,
     @UploadedFile(
@@ -169,6 +198,15 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'Avatar updated' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 403, description: 'Forbidden – not your own profile' })
+  /**
+   * Updates an avatar for a specific userId
+   * Relies on User Service verification to handle the specific request
+   * Validates max sixe and file type restricted to png, jpeg, jpg, webp
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the user
+   * @returns {Promise<UserUploadAvatarRes>} - Avatar object
+   */
   async updateAvatar(
     @Param('user_id') user_id: string,
     @UploadedFile(
@@ -194,6 +232,14 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'Avatar deleted' })
   @ApiResponse({ status: 403, description: 'Forbidden – not your own profile' })
   @ApiResponse({ status: 404, description: 'User not found' })
+  /**
+   * Deletes an avatar for a specific userId
+   * Relies on User Service verification to handle the specific request
+   * Helper method to clear cache is used to clean the cache request
+   * @async
+   * @param {string} userId - UUID credentials of the user
+   * @returns {message} - Avatar deleted
+   */
   async deleteAvatar(@Param('user_id') user_id: string) {
     await this.userService.deleteAvatar(user_id)
     const cacheKey = UserController.getSelfCacheKey(user_id)
