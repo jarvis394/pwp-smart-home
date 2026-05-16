@@ -117,7 +117,7 @@ export class ApartmentsController {
    * Helper method to clear cache is used to clean the cache request
    * @async
    * @param {string} userId - UUID credentials of the apartment owner
-   * @Body CreateApartmentDTO - DTO for Apartment creation
+   * @param {CreateApartmentDTO} data - DTO for Apartment creation
    * @returns {Promise<Apartment>} - Single apartment creation object
    */
   async create(
@@ -146,7 +146,7 @@ export class ApartmentsController {
    * @async
    * @param {string} userId - UUID credentials of the apartment owner
    * @param {string} apartmentId - UUID value for the apartment
-   * @Body UpdateApartmentDTO - DTO for apartment update
+   * @param {UpdateApartmentDTO} data - DTO for apartment update
    * @returns {Promise<Apartment>} - Single apartment update object
    */
   async update(

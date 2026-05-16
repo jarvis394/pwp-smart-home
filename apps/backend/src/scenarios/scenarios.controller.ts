@@ -119,7 +119,7 @@ export class ScenariosController {
    * Helper method to clear cache is used to clean the cache request
    * @async
    * @param {string} userId - UUID credentials of the scenario owner
-   * @Body CreateScenarioDTO - DTO for scenario creation
+   * @param {CreateScenarioDTO} data - DTO for scenario creation
    * @returns {Promise<Scenario>} - Single scenario creation object
    */
   async create(
@@ -149,7 +149,7 @@ export class ScenariosController {
    * @async
    * @param {string} userId - UUID credentials of the scenario owner
    * @param {string} scenarioId - UUID value for the scenario
-   * @Body UpdateScenarioDTO - DTO for scenario update
+   * @param {UpdateScenarioDTO} data - DTO for scenario update
    * @returns {Promise<Scenario>} - Single scenario update object
    */
   async update(

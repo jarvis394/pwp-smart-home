@@ -149,7 +149,7 @@ export class RoomsController {
    * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {string} apartmentId - UUID value for the apartment
-   * @Body CreateDTO - DTO for Room creation
+   * @param {CreateDTO} data - DTO for Room creation
    * @returns {Promise<Room>} - Single room creation object
    */
   async create(
@@ -176,7 +176,7 @@ export class RoomsController {
    * @async
    * @param {string} userId - UUID credentials of the room owner
    * @param {string} [roomId] - UUID value for the room
-   * @Body UpdateDTO - DTO for Room update
+   * @param {UpdateDTO} data - DTO for Room update
    * @returns {Promise<Room>} - Single room update object
    */
   async update(

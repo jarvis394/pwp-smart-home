@@ -116,7 +116,7 @@ export class DevicesController {
    * Helper method to clear cache is used to clean the cache request
    * @async
    * @param {string} userId - UUID credentials of the device owner
-   * @Body CreateDeviceDTO - DTO for Device creation
+   * @param {CreateDeviceDTO} data - DTO for Device creation
    * @returns {Promise<Device>} - Single device creation object
    */
   async addDevice(
@@ -141,7 +141,7 @@ export class DevicesController {
    * @async
    * @param {string} userId - UUID credentials of the device owner
    * @param {string} deviceId - UUID value for the device
-   * @Body UpdateDeviceDTO - DTO for device update
+   * @param {UpdateDeviceDTO} data - DTO for device update
    * @returns {Promise<Device>} - Single device update object
    */
   async updateDevice(
