@@ -176,9 +176,9 @@ export class DevicesController {
     @Param('user_id') userId: string,
     @Param('device_id') deviceId: string
   ) {
-    const state = await this.devicesService.toggleFavorite(userId, deviceId)
+    const res = await this.devicesService.toggleFavorite(userId, deviceId)
     await this.invalidateDeviceCaches(userId)
-    return state
+    return res
   }
 
   @Put(':device_id/state')

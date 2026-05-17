@@ -209,7 +209,7 @@ describe('Devices (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
-    expect(res.body.favorite).toBe(true)
+    expect(res.body.state).toBe(true)
   })
 
   it('DELETE /api/user/{user_id}/devices/{device_id} - 200: delete device', async () => {

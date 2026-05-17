@@ -33,7 +33,7 @@ import {
 
 export const apiSlice = createApi({
   baseQuery,
-  tagTypes: ['Device', 'User'],
+  tagTypes: ['Device', 'User', 'Favorites'],
   endpoints: (builder) => ({
     register: builder.mutation<UserRegisterRes, UserRegisterReq>({
       query: (body) => ({
@@ -90,6 +90,7 @@ export const apiSlice = createApi({
       }),
       providesTags: (result = { devices: [] }) => [
         'Device',
+        'Favorites',
         ...result.devices.map((device) => ({
           type: 'Device' as const,
           id: device.id,
@@ -106,6 +107,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: (_result, _error, arg) => [
         { type: 'Device', id: arg.id },
+        'Favorites',
       ],
     }),
     updateDeviceState: builder.mutation<
