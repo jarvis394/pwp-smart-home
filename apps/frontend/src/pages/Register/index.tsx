@@ -91,6 +91,7 @@ const Register: React.FC = () => {
     })
       .unwrap()
       .then((data) => {
+        console.log('Register success:', data)
         dispatch(setUser(data.user))
         dispatch(setUserFetchingState(FetchingState.FULFILLED))
         navigate(getRouteByAlias('favorites').path)
@@ -164,4 +165,4 @@ const Register: React.FC = () => {
   )
 }
 
-export default Register
+export default React.memo(Register)

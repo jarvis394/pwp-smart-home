@@ -18,6 +18,8 @@
     "db:seed": "yarn nx run database:seed",
     "db:studio": "yarn nx run database:studio",
     "test": "yarn nx run-many -t test",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up",
+    "docker": "docker compose -f docker-compose.yml up --build",
     "prepare": "husky install"
   },
   "private": true,

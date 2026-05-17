@@ -24,6 +24,11 @@ const Root = styled(MUIButtonBase)(({ theme }) => ({
   '&.Button--primary': {
     background: theme.palette.primary.main,
   },
+  '&.Button--disabled': {
+    opacity: 0.7,
+    cursor: 'pointer',
+    pointerEvents: 'none',
+  },
   '&.Button--primaryTransparent': {
     background: alpha(theme.palette.primary.main, 0.16),
     color: theme.palette.primary.dark,
@@ -44,12 +49,14 @@ const Button: React.FC<ButtonProps> = ({
   children,
   className,
   variant = 'primary',
+  disabled,
   ...props
 }) => {
   return (
     <Root
       {...props}
       className={cx(className, {
+        'Button--disabled': disabled,
         'Button--primary': variant === 'primary',
         'Button--default': variant === 'default',
         'Button--secondary': variant === 'secondary',
@@ -61,4 +68,4 @@ const Button: React.FC<ButtonProps> = ({
   )
 }
 
-export default Button
+export default React.memo(Button)

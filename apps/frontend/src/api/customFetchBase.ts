@@ -45,10 +45,30 @@ const customFetchBase: BaseQueryFn<
 
   let result = await baseQuery(args, api, extraOptions)
 
-  if ((result.error?.data as ApiErrorMessage)?.statusCode === 401) {
+  const url = typeof args === 'string' ? args : args?.url
+  const isAuthRequest =
+    url === '/auth/login' || url === '/auth/register' || url === '/auth/logout'
+
+  if (
+    (result.error?.data as ApiErrorMessage)?.statusCode === 401 &&
+    !isAuthRequest
+  ) {
     if (!mutex.isLocked()) {
       const release = await mutex.acquire()
       const refreshToken = (api.getState() as RootState).auth.refreshToken
+
+      if (!refreshToken) {
+        api.dispatch(logout())
+        if (
+          typeof window !== 'undefined' &&
+          window.location.pathname !== getRouteByAlias('login').path &&
+          window.location.pathname !== getRouteByAlias('register').path
+        ) {
+          window.location.href = getRouteByAlias('login').path
+        }
+        release()
+        return result
+      }
 
       try {
         const refreshResult = await baseQuery(
@@ -78,7 +98,13 @@ const customFetchBase: BaseQueryFn<
           )
         } else {
           api.dispatch(logout())
-          window.location.href = getRouteByAlias('login').path
+          if (
+            typeof window !== 'undefined' &&
+            window.location.pathname !== getRouteByAlias('login').path &&
+            window.location.pathname !== getRouteByAlias('register').path
+          ) {
+            window.location.href = getRouteByAlias('login').path
+          }
         }
       } finally {
         release()

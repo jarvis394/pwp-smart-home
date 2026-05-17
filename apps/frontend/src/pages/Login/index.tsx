@@ -67,14 +67,13 @@ const Login: React.FC = () => {
 
     dispatch(setUserFetchingState(FetchingState.PENDING))
 
-    console.log('Entered credentials:', email, password)
-
     login({
       email,
       password,
     })
       .unwrap()
       .then((data) => {
+        console.log('Login success:', data)
         dispatch(setUser(data.user))
         dispatch(setUserFetchingState(FetchingState.FULFILLED))
         navigate(getRouteByAlias('favorites').path)
@@ -126,4 +125,4 @@ const Login: React.FC = () => {
   )
 }
 
-export default Login
+export default React.memo(Login)
