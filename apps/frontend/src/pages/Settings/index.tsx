@@ -1,9 +1,21 @@
 import { AttachFileOutlined } from '@mui/icons-material'
-import { CircularProgress, alpha, styled } from '@mui/material'
+import {
+  CircularProgress,
+  alpha,
+  styled,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button as MUIButton,
+} from '@mui/material'
 import React, { useRef, useState } from 'react'
+import { useSnackbar } from 'src/hooks/useSnackbar'
 import {
   useUpdateUserMutation,
   useUploadUserAvatarMutation,
+  useDeleteUserMutation,
 } from 'src/api/index'
 import { AppBar } from 'src/components/AppBar'
 import Button from 'src/components/Button'
@@ -92,13 +104,18 @@ const UploadAvatar: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '')
   const [uploadUserAvatar, { isLoading }] = useUploadUserAvatarMutation()
 
+  const { showSnackbar, SnackbarComponent } = useSnackbar()
+
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     if (!$fileInput.current) return
 
     const uploadedFile = e.target.files?.[0]
 
     if (!uploadedFile) return
-    if (!ACCEPTED_IMAGE_FILE_TYPES.some((e) => e === uploadedFile.type)) return
+    if (!ACCEPTED_IMAGE_FILE_TYPES.some((e) => e === uploadedFile.type)) {
+      showSnackbar('Invalid file type', 'error')
+      return
+    }
 
     const newAvatar = new FormData()
     newAvatar.append('file', uploadedFile)
@@ -108,6 +125,13 @@ const UploadAvatar: React.FC = () => {
       .unwrap()
       .then((data) => {
         setAvatarUrl(data.avatarUrl)
+        showSnackbar('Avatar updated successfully', 'success')
+      })
+      .catch((error) => {
+        showSnackbar(
+          error?.data?.message || error?.message || 'Failed to update avatar',
+          'error'
+        )
       })
 
     $fileInput.current.value = ''
@@ -134,6 +158,7 @@ const UploadAvatar: React.FC = () => {
       {isLoading && <CircularProgress color="inherit" size={32} />}
       <AttachFileOutlined />
       Upload avatar
+      {SnackbarComponent}
     </UploadButtonRoot>
   )
 }
@@ -146,6 +171,10 @@ const Settings: React.FC = () => {
   const [lastName, setLastName] = useState(user?.lastName || '')
   const [updateUser, { isLoading }] = useUpdateUserMutation()
 
+  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation()
+  const { showSnackbar, SnackbarComponent } = useSnackbar()
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
   const handleDarkThemeSwitchChange = () => {
     dispatch(setTheme(theme === Theme.LIGHT ? Theme.DARK : Theme.LIGHT))
   }
@@ -155,7 +184,38 @@ const Settings: React.FC = () => {
       .unwrap()
       .then((data) => {
         dispatch(setUser(data.user))
+        showSnackbar('Profile updated successfully', 'success')
       })
+      .catch((error) => {
+        showSnackbar(
+          error?.data?.message || error?.message || 'Failed to update profile',
+          'error'
+        )
+      })
+  }
+
+  const handleDeleteUserClick = () => {
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    deleteUser({})
+      .unwrap()
+      .then(() => {
+        showSnackbar('Account deleted', 'success')
+        setDeleteDialogOpen(false)
+      })
+      .catch((error) => {
+        showSnackbar(
+          error?.data?.message || error?.message || 'Failed to delete account',
+          'error'
+        )
+        setDeleteDialogOpen(false)
+      })
+  }
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false)
   }
 
   return (
@@ -199,8 +259,42 @@ const Settings: React.FC = () => {
             {isLoading && <CircularProgress color="inherit" size={16} />}
             Save
           </Button>
+          <Button
+            disabled={isDeleting}
+            variant="error"
+            onClick={handleDeleteUserClick}
+          >
+            {isDeleting && <CircularProgress color="inherit" size={16} />}
+            Delete account
+          </Button>
         </Section>
       </Content>
+
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete your account?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <MUIButton
+            onClick={handleCloseDeleteDialog}
+            sx={{ color: 'text.secondary' }}
+            autoFocus
+          >
+            Cancel
+          </MUIButton>
+          <MUIButton
+            disabled={isDeleting}
+            onClick={handleConfirmDelete}
+            color="error"
+          >
+            Delete
+          </MUIButton>
+        </DialogActions>
+      </Dialog>
+      {SnackbarComponent}
     </>
   )
 }

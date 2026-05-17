@@ -29,6 +29,18 @@ export class DevicesService {
   }
 
   /**
+   * Gets a singular device
+   * @async
+   * @param {string} userId - UUID credentials of the devices owner
+   * @returns {Promise<Device>} - Object of device
+   */
+  async getDevice(userId: string, deviceId: string): Promise<Device> {
+    return await firstValueFrom(
+      this.client.send({ cmd: 'getDevice' }, { userId, deviceId })
+    )
+  }
+
+  /**
    * Gets a list of favorite devices
    * @async
    * @param {string} userId - UUID credentials of the devices owner

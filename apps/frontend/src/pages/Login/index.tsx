@@ -12,6 +12,7 @@ import { useLoginMutation } from 'src/api'
 import { useAppDispatch } from 'src/store'
 import { setUser, setUserFetchingState } from 'src/store/auth'
 import { FetchingState } from 'src/types/FetchingState'
+import { useSnackbar } from 'src/hooks/useSnackbar'
 
 const Root = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -57,6 +58,7 @@ const Login: React.FC = () => {
   } = useForm<{ email: string; password: string }>()
   const [login, { isLoading }] = useLoginMutation()
   const dispatch = useAppDispatch()
+  const { showSnackbar, SnackbarComponent } = useSnackbar()
 
   const onSubmit = () => {
     const { email, password } = getValues()
@@ -76,9 +78,14 @@ const Login: React.FC = () => {
         console.log('Login success:', data)
         dispatch(setUser(data.user))
         dispatch(setUserFetchingState(FetchingState.FULFILLED))
+        showSnackbar('Login successful', 'success')
         navigate(getRouteByAlias('favorites').path)
       })
-      .catch(() => {
+      .catch((error) => {
+        showSnackbar(
+          error?.data?.message || error?.message || 'Login failed',
+          'error'
+        )
         return reject()
       })
   }
@@ -121,6 +128,7 @@ const Login: React.FC = () => {
           Register
         </Button>
       </Root>
+      {SnackbarComponent}
     </>
   )
 }

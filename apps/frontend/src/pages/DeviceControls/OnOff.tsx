@@ -4,6 +4,7 @@ import { getTurnedOnState, getOnOffText } from 'src/components/DeviceCard'
 import Switch from 'src/components/Switch'
 import { LightBulb, Kettle, Thermostat } from '@smart-home/db/types'
 import { useToggleDeviceOnOffMutation } from 'src/api/index'
+import { useSnackbar } from 'src/hooks/useSnackbar'
 
 const Root = styled('div')({
   display: 'flex',
@@ -39,30 +40,42 @@ const OnOff: React.FC<{
 }> = ({ device }) => {
   const [toggle] = useToggleDeviceOnOffMutation()
   const [isTurnedOn, setTurnedOn] = useState(getTurnedOnState(device))
+  const { showSnackbar, SnackbarComponent } = useSnackbar()
 
   const handleOnOffChange = (
     _event: React.ChangeEvent<HTMLInputElement>,
     checked: boolean
   ) => {
     setTurnedOn(checked)
-    toggle({ id: device.id })
+    toggle({ id: device.id, state: checked ? 'on' : 'off' })
       .unwrap()
       .then((data) => {
-        setTurnedOn(data.state)
+        setTurnedOn(data.on)
+      })
+      .catch((e) => {
+        showSnackbar(
+          e?.data?.message || e?.message || 'Failed to toggle device state',
+          'error'
+        )
+        setTurnedOn(!checked)
       })
   }
 
   return (
-    <Root>
-      <OnOffButton htmlFor="on-off-switch">
-        {getOnOffText(isTurnedOn)}
-        <Switch
-          onChange={handleOnOffChange}
-          checked={isTurnedOn}
-          id="on-off-switch"
-        />
-      </OnOffButton>
-    </Root>
+    <>
+      <Root>
+        <OnOffButton htmlFor="on-off-switch">
+          {getOnOffText(isTurnedOn)}
+          <Switch
+            onChange={handleOnOffChange}
+            checked={isTurnedOn}
+            inputProps={{ 'aria-label': 'controlled' }}
+            id="on-off-switch"
+          />
+        </OnOffButton>
+      </Root>
+      {SnackbarComponent}
+    </>
   )
 }
 

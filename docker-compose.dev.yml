@@ -3,7 +3,7 @@ services:
     image: redis:latest
     restart: always
     ports:
-      - "${REDIS_PORT}:6379"
+      - '${REDIS_PORT}:6379'
     volumes:
       - redis_data:/data
 
@@ -11,7 +11,7 @@ services:
     image: postgres:latest
     restart: always
     ports:
-      - "${DB_PORT}:5432"
+      - '${DB_PORT}:5432'
     env_file:
       - .env
     environment:
@@ -21,7 +21,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_DATABASE}']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"
+      - '5672:5672'
     healthcheck:
       test: rabbitmq-diagnostics -q check_running
       interval: 10s
@@ -43,7 +43,7 @@ services:
     environment:
       DB_HOST: db
       POSTGRES_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_DATABASE}
-    command: ["yarn", "db:migrate"]
+    command: ['yarn', 'db:migrate']
     depends_on:
       db:
         condition: service_healthy

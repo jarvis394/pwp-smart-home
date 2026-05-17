@@ -98,8 +98,7 @@ export class DevicesController {
     @Param('user_id') userId: string,
     @Param('device_id') deviceId: string
   ): Promise<Device> {
-    const devices = await this.devicesService.getDevices(userId)
-    const device = devices.find((d) => d.id === deviceId)
+    const device = await this.devicesService.getDevice(userId, deviceId)
     if (!device) {
       throw new NotFoundException('Device not found')
     }
@@ -202,7 +201,8 @@ export class DevicesController {
     @Param('device_id') deviceId: string,
     @Query('toggle') toggle: 'on' | 'off'
   ) {
-    if (!toggle) throw new BadRequestException('Missing toggle parameter')
+    if (!toggle || (toggle !== 'on' && toggle !== 'off'))
+      throw new BadRequestException('Invalid toggle parameter')
     const result = await this.devicesService.setState(
       userId,
       deviceId,

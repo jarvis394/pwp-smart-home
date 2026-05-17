@@ -27,6 +27,15 @@ export class DevicesController {
     return { devices }
   }
 
+  @MessagePattern({ cmd: 'getDevice' })
+  async getDevice(@Payload() data: DataWithUserID & { deviceId: string }) {
+    const device = await this.devicesService.getDevice(
+      data.userId,
+      data.deviceId
+    )
+    return { device }
+  }
+
   @MessagePattern({ cmd: 'getFavoriteDevices' })
   async getFavoriteDevices(@Payload() data: DataWithUserID) {
     const devices = await this.devicesService.getFavoriteDevices(data.userId)

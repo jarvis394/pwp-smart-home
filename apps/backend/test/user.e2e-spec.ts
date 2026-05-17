@@ -23,9 +23,21 @@ describe('User (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe())
     await app.init()
 
-    const loginRes = await request(app.getHttpServer())
+    let loginRes = await request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({ email: 'dl3@test.com', password: 'dl3test123' })
+      .send({ email: 'usertest@test.com', password: 'dl3test123' })
+
+    if (loginRes.status !== 201) {
+      const registerRes = await request(app.getHttpServer())
+        .post('/api/auth/register')
+        .send({
+          email: 'usertest@test.com',
+          password: 'dl3test123',
+          firstName: 'User',
+          lastName: 'Test',
+        })
+      loginRes = registerRes
+    }
 
     token = loginRes.body.tokens.accessToken
     userId = loginRes.body.user.id
@@ -173,6 +185,23 @@ describe('User (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(403)
+  })
+
+  it('DELETE /api/user/:user_id - 403: forbidden (different user)', async () => {
+    const res = await request(app.getHttpServer())
+      .delete('/api/user/00000000-0000-0000-0000-000000000000')
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(403)
+  })
+
+  it('DELETE /api/user/:user_id - 200: delete user', async () => {
+    const res = await request(app.getHttpServer())
+      .delete(`/api/user/${userId}`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.ok).toBe(true)
   })
 
   afterAll(async () => {

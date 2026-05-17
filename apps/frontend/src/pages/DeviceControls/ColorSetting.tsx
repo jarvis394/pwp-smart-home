@@ -3,12 +3,14 @@ import {
   BrightnessLowOutlined,
 } from '@mui/icons-material'
 import { Box, sliderClasses, styled } from '@mui/material'
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import Slider from 'src/components/Slider'
 import Tabs, { TabsChangeHandler } from 'src/components/Tabs'
 import { ArrayElement } from 'src/types/ArrayElement'
 import { LightBulb, DeviceCapabilityType } from '@smart-home/db/types'
 import exhaustivnessCheck from 'src/utils/exhaustivnessCheck'
+import { useUpdateDeviceMutation } from 'src/api/index'
+import { useSnackbar } from 'src/hooks/useSnackbar'
 
 const VERTICAL_SLIDER_HEIGHT = 336
 
@@ -61,19 +63,108 @@ const COLOR_MODES = ['warm_light', 'cold_light', 'hsv'] as const
 type ColorMode = ArrayElement<typeof COLOR_MODES>
 
 const ColorSetting: React.FC<{ device: LightBulb }> = ({ device }) => {
-  const [selectedColorMode, setSelectedColorMode] = useState<ColorMode>('hsv')
-  const _state = device.capabilities[DeviceCapabilityType.COLOR_SETTING].state
-  const [value, setValue] = useState(30)
+  const [updateDevice] = useUpdateDeviceMutation()
+  const { showSnackbar, SnackbarComponent } = useSnackbar()
 
-  const handleSliderChange = (_event: Event, newValue: number | number[]) => {
-    if (Array.isArray(newValue)) return
-    setValue(newValue)
-  }
+  const [selectedColorMode, setSelectedColorMode] = useState<ColorMode>(() => {
+    const state = device.capabilities[DeviceCapabilityType.COLOR_SETTING]?.state
+    if (state?.instance === 'hsv') return 'hsv'
+    if (state?.instance === 'temperature_k') {
+      return state.value < 4500 ? 'warm_light' : 'cold_light'
+    }
+    return 'hsv'
+  })
 
-  const handleTabsChange: TabsChangeHandler = (_event, value) => {
-    setSelectedColorMode(value as ColorMode)
-    setValue(30)
-  }
+  const [value, setValue] = useState<number>(() => {
+    const state = device.capabilities[DeviceCapabilityType.COLOR_SETTING]?.state
+    if (state?.instance === 'hsv') return state.value.h
+    if (state?.instance === 'temperature_k') return state.value
+    return 180
+  })
+
+  // Synchronize component state with updated device data from server
+  useEffect(() => {
+    const state = device.capabilities[DeviceCapabilityType.COLOR_SETTING]?.state
+    if (state?.instance === 'hsv') {
+      setSelectedColorMode('hsv')
+      setValue(state.value.h)
+    } else if (state?.instance === 'temperature_k') {
+      setSelectedColorMode(state.value < 4500 ? 'warm_light' : 'cold_light')
+      setValue(state.value)
+    }
+  }, [device])
+
+  const sendColorUpdate = useCallback(
+    (mode: ColorMode, val: number) => {
+      const colorState =
+        mode === 'hsv'
+          ? {
+              instance: 'hsv' as const,
+              value: { h: val, s: 1, v: 1 },
+            }
+          : {
+              instance: 'temperature_k' as const,
+              value: val,
+            }
+
+      const updatedCapabilities = {
+        ...device.capabilities,
+        [DeviceCapabilityType.COLOR_SETTING]: {
+          type: DeviceCapabilityType.COLOR_SETTING,
+          state: colorState,
+        },
+      }
+
+      updateDevice({
+        id: device.id,
+        body: {
+          capabilities: updatedCapabilities,
+        },
+      })
+        .unwrap()
+        .catch((e) => {
+          showSnackbar(
+            e?.data?.message || e?.message || 'Failed to update color setting',
+            'error'
+          )
+        })
+    },
+    [device, updateDevice, showSnackbar]
+  )
+
+  const handleSliderChange = useCallback(
+    (_event: Event, newValue: number | number[]) => {
+      if (Array.isArray(newValue)) return
+      setValue(newValue)
+    },
+    []
+  )
+
+  const handleSliderChangeCommitted = useCallback(
+    (_event: React.SyntheticEvent | Event, newValue: number | number[]) => {
+      if (Array.isArray(newValue)) return
+      sendColorUpdate(selectedColorMode, newValue)
+    },
+    [selectedColorMode, sendColorUpdate]
+  )
+
+  const handleTabsChange: TabsChangeHandler = useCallback(
+    (_event, val) => {
+      const mode = val as ColorMode
+      setSelectedColorMode(mode)
+
+      let defaultVal = 180
+      if (mode === 'warm_light') {
+        defaultVal = 3000
+      } else if (mode === 'cold_light') {
+        defaultVal = 5500
+      }
+
+      setValue(defaultVal)
+      sendColorUpdate(mode, defaultVal)
+    },
+    [sendColorUpdate]
+  )
 
   const SliderComponent = useMemo(() => {
     switch (selectedColorMode) {
@@ -88,7 +179,9 @@ const ColorSetting: React.FC<{ device: LightBulb }> = ({ device }) => {
             orientation="vertical"
             min={0}
             max={360}
+            step={1}
             onChange={handleSliderChange}
+            onChangeCommitted={handleSliderChangeCommitted}
             value={value}
           />
         )
@@ -100,7 +193,11 @@ const ColorSetting: React.FC<{ device: LightBulb }> = ({ device }) => {
             }
             iconAfter={<BrightnessLowOutlined sx={{ width: 32, height: 32 }} />}
             orientation="vertical"
+            min={2700}
+            max={4500}
+            step={10}
             onChange={handleSliderChange}
+            onChangeCommitted={handleSliderChangeCommitted}
             value={value}
           />
         )
@@ -112,28 +209,40 @@ const ColorSetting: React.FC<{ device: LightBulb }> = ({ device }) => {
             }
             iconAfter={<BrightnessLowOutlined sx={{ width: 32, height: 32 }} />}
             orientation="vertical"
+            min={4500}
+            max={6500}
+            step={10}
             onChange={handleSliderChange}
+            onChangeCommitted={handleSliderChangeCommitted}
             value={value}
           />
         )
       default:
         return exhaustivnessCheck(selectedColorMode)
     }
-  }, [selectedColorMode, value])
+  }, [
+    selectedColorMode,
+    value,
+    handleSliderChange,
+    handleSliderChangeCommitted,
+  ])
 
   return (
-    <Root>
-      <Tabs
-        items={[
-          { label: 'Warm light', value: 'warm_light' },
-          { label: 'Cold light', value: 'cold_light' },
-          { label: 'Manual', value: 'hsv' },
-        ]}
-        value={selectedColorMode}
-        onChange={handleTabsChange}
-      />
-      <Box sx={{ height: VERTICAL_SLIDER_HEIGHT }}>{SliderComponent}</Box>
-    </Root>
+    <>
+      <Root>
+        <Tabs
+          items={[
+            { label: 'Warm light', value: 'warm_light' },
+            { label: 'Cold light', value: 'cold_light' },
+            { label: 'Manual', value: 'hsv' },
+          ]}
+          value={selectedColorMode}
+          onChange={handleTabsChange}
+        />
+        <Box sx={{ height: VERTICAL_SLIDER_HEIGHT }}>{SliderComponent}</Box>
+      </Root>
+      {SnackbarComponent}
+    </>
   )
 }
 

@@ -39,10 +39,14 @@ const Root = styled(MUIButtonBase)(({ theme }) => ({
   '&.Button--default': {
     background: theme.palette.background.default,
   },
+  '&.Button--error': {
+    background: theme.palette.error.main,
+    color: theme.palette.error.contrastText,
+  },
 }))
 
 type ButtonProps = ButtonBaseProps & {
-  variant?: 'primary' | 'default' | 'secondary' | 'primaryTransparent'
+  variant?: 'primary' | 'default' | 'secondary' | 'primaryTransparent' | 'error'
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -61,6 +65,7 @@ const Button: React.FC<ButtonProps> = ({
         'Button--default': variant === 'default',
         'Button--secondary': variant === 'secondary',
         'Button--primaryTransparent': variant === 'primaryTransparent',
+        'Button--error': variant === 'error',
       })}
     >
       {children}

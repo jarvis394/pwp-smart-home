@@ -17,7 +17,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_DATABASE}']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -37,7 +37,7 @@ services:
     environment:
       DB_HOST: db
       POSTGRES_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_DATABASE}
-    command: ["yarn", "db:migrate"]
+    command: ['yarn', 'db:migrate']
     depends_on:
       db:
         condition: service_healthy
@@ -50,7 +50,7 @@ services:
       dockerfile: apps/backend/Dockerfile
     restart: always
     ports:
-      - "5000:5000"
+      - '5000:5000'
     depends_on:
       db:
         condition: service_healthy
@@ -96,7 +96,7 @@ services:
       dockerfile: apps/frontend/Dockerfile
     restart: always
     ports:
-      - "4200:4200"
+      - '4200:4200'
     depends_on:
       - backend
     env_file:
@@ -108,7 +108,7 @@ services:
       dockerfile: apps/auxiliary/Dockerfile
     restart: always
     ports:
-      - "5001:5000"
+      - '5001:5000'
     depends_on:
       db:
         condition: service_healthy

@@ -40,12 +40,22 @@ export const fetchUserSelf = createAsyncThunk<
   }
 
   const fetch = async (token: string) => {
+    let userId = null
+    try {
+      const payload = token.split('.')[1]
+      if (payload) userId = JSON.parse(atob(payload)).sub
+    } catch (e) {
+      // ignore
+    }
+
+    if (!userId) throw new Error('Invalid token format')
+
     return await axios<UserGetSelfRes>({
-      url: API_URL + '/user',
+      url: API_URL + `/user/${userId}`,
       method: 'GET',
       withCredentials: true,
       headers: {
-        Authorization: 'Bearer ' + token,
+        Authorization: `Bearer ${token}`,
       },
     })
   }

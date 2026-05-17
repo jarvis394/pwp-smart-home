@@ -5,7 +5,7 @@ import {
 } from 'drizzle-orm'
 import { pgTable, varchar, boolean, jsonb } from 'drizzle-orm/pg-core'
 
-import { defaultId, defaultJsonbValue } from '../extend'
+import { defaultId, defaultJsonbValue, timestamps } from '../extend'
 import { DeviceCapabilities, DeviceState, DeviceType } from '../types/Device'
 import { users } from './users'
 import { rooms } from './rooms'
@@ -34,6 +34,7 @@ export const devices = pgTable('devices', {
     onDelete: 'cascade',
     onUpdate: 'cascade',
   }),
+  ...timestamps(),
 })
 
 export const devicesRelations = relations(devices, ({ one }) => ({

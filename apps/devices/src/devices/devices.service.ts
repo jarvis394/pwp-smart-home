@@ -34,12 +34,15 @@ export class DevicesService {
       type: deviceDocument.type,
       model: deviceDocument.model,
       roomId: deviceDocument.roomId,
+      createdAt: deviceDocument.createdAt,
+      updatedAt: deviceDocument.updatedAt,
     }
   }
 
   async getDevices(userId: User['id']): Promise<Device[]> {
     const devices = await this.db.query.devices.findMany({
       where: (fields, { eq }) => eq(fields.userId, userId),
+      orderBy: (fields, { asc }) => [asc(fields.createdAt), asc(fields.id)],
     })
     return devices.map((device) => this.serializeDevice(device))
   }
@@ -72,6 +75,7 @@ export class DevicesService {
     const devices = await this.db.query.devices.findMany({
       where: (fields, { eq, and }) =>
         and(eq(fields.userId, userId), eq(fields.favorite, true)),
+      orderBy: (fields, { asc }) => [asc(fields.createdAt), asc(fields.id)],
     })
     return devices.map((device) => this.serializeDevice(device))
   }
