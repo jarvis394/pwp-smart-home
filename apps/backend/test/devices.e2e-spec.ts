@@ -43,11 +43,15 @@ describe('Devices (e2e)', () => {
     })
       .overrideProvider('DEVICES_SERVICE')
       .useValue({
-        send: jest.fn().mockImplementation((pattern) => {
-          console.log('Mock send called with:', pattern)
+        send: jest.fn().mockImplementation((pattern, data) => {
+          console.log('Mock send called with:', pattern, data)
           switch (pattern.cmd) {
             case 'getDevices':
               return of([mockDevice])
+            case 'getDevice':
+              return data && data.deviceId === 'mock-1'
+                ? of(mockDevice)
+                : of(null)
             case 'getFavoriteDevices':
               return of([mockDevice])
             case 'addDevice':
@@ -139,6 +143,24 @@ describe('Devices (e2e)', () => {
     expect(res.status).toBe(200)
     expect(Array.isArray(res.body)).toBe(true)
     expect(res.body[0].id).toBeDefined()
+  })
+
+  it('GET /api/user/{user_id}/devices/{device_id} - 200: return single device', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/user/${userId}/devices/mock-1`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.id).toBe('mock-1')
+    expect(res.body.name).toBe('Mock Device')
+  })
+
+  it('GET /api/user/{user_id}/devices/{device_id} - 404: device not found', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/user/${userId}/devices/non-existent`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(404)
   })
 
   it('GET /api/user/{user_id}/favorites - 200: return favorites', async () => {

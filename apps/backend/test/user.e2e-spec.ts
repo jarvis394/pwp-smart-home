@@ -23,21 +23,9 @@ describe('User (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe())
     await app.init()
 
-    let loginRes = await request(app.getHttpServer())
+    const loginRes = await request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({ email: 'usertest@test.com', password: 'dl3test123' })
-
-    if (loginRes.status !== 201) {
-      const registerRes = await request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send({
-          email: 'usertest@test.com',
-          password: 'dl3test123',
-          firstName: 'User',
-          lastName: 'Test',
-        })
-      loginRes = registerRes
-    }
+      .send({ email: 'dl3@test.com', password: 'dl3test123' })
 
     token = loginRes.body.tokens.accessToken
     userId = loginRes.body.user.id
@@ -196,9 +184,23 @@ describe('User (e2e)', () => {
   })
 
   it('DELETE /api/user/:user_id - 200: delete user', async () => {
+    const tempEmail = `temp_delete_${Date.now()}@test.com`
+    const registerRes = await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({
+        email: tempEmail,
+        password: 'tempPassword123',
+        firstName: 'Temp',
+        lastName: 'User',
+      })
+    expect(registerRes.status).toBe(201)
+
+    const tempToken = registerRes.body.tokens.accessToken
+    const tempUserId = registerRes.body.user.id
+
     const res = await request(app.getHttpServer())
-      .delete(`/api/user/${userId}`)
-      .set('Authorization', `Bearer ${token}`)
+      .delete(`/api/user/${tempUserId}`)
+      .set('Authorization', `Bearer ${tempToken}`)
 
     expect(res.status).toBe(200)
     expect(res.body.ok).toBe(true)

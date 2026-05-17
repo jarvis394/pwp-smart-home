@@ -33,7 +33,7 @@ export class DevicesController {
       data.userId,
       data.deviceId
     )
-    return { device }
+    return device
   }
 
   @MessagePattern({ cmd: 'getFavoriteDevices' })
