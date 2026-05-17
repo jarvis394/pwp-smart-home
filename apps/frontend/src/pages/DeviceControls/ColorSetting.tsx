@@ -9,7 +9,7 @@ import Tabs, { TabsChangeHandler } from 'src/components/Tabs'
 import { ArrayElement } from 'src/types/ArrayElement'
 import { LightBulb, DeviceCapabilityType } from '@smart-home/db/types'
 import exhaustivnessCheck from 'src/utils/exhaustivnessCheck'
-import { useUpdateDeviceMutation } from 'src/api/index'
+import { useUpdateDeviceStateMutation } from 'src/api/index'
 import { useSnackbar } from 'src/hooks/useSnackbar'
 
 const VERTICAL_SLIDER_HEIGHT = 336
@@ -63,7 +63,7 @@ const COLOR_MODES = ['warm_light', 'cold_light', 'hsv'] as const
 type ColorMode = ArrayElement<typeof COLOR_MODES>
 
 const ColorSetting: React.FC<{ device: LightBulb }> = ({ device }) => {
-  const [updateDevice] = useUpdateDeviceMutation()
+  const [updateDeviceState] = useUpdateDeviceStateMutation()
   const { showSnackbar, SnackbarComponent } = useSnackbar()
 
   const [selectedColorMode, setSelectedColorMode] = useState<ColorMode>(() => {
@@ -107,29 +107,26 @@ const ColorSetting: React.FC<{ device: LightBulb }> = ({ device }) => {
               value: val,
             }
 
-      const updatedCapabilities = {
-        ...device.capabilities,
-        [DeviceCapabilityType.COLOR_SETTING]: {
-          type: DeviceCapabilityType.COLOR_SETTING,
-          state: colorState,
-        },
-      }
-
-      updateDevice({
+      updateDeviceState({
         id: device.id,
         body: {
-          capabilities: updatedCapabilities,
+          capabilities: {
+            [DeviceCapabilityType.COLOR_SETTING]: {
+              type: DeviceCapabilityType.COLOR_SETTING,
+              state: colorState,
+            },
+          },
         },
       })
         .unwrap()
-        .catch((e) => {
+        .catch((e: { data?: { message?: string }; message?: string }) => {
           showSnackbar(
             e?.data?.message || e?.message || 'Failed to update color setting',
             'error'
           )
         })
     },
-    [device, updateDevice, showSnackbar]
+    [device, updateDeviceState, showSnackbar]
   )
 
   const handleSliderChange = useCallback(

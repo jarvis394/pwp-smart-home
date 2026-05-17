@@ -9,8 +9,8 @@ import {
   UserRegisterRes,
   AddDeviceRes,
   AddDeviceReq,
-  ToggleDeviceOnOffRes,
-  ToggleDeviceOnOffReq,
+  UpdateDeviceStateRes,
+  UpdateDeviceStateReq,
   DeviceDeleteRes,
   DeviceDeleteReq,
   UserUploadAvatarRes,
@@ -108,13 +108,14 @@ export const apiSlice = createApi({
         { type: 'Device', id: arg.id },
       ],
     }),
-    toggleDeviceOnOff: builder.mutation<
-      ToggleDeviceOnOffRes,
-      ToggleDeviceOnOffReq
+    updateDeviceState: builder.mutation<
+      UpdateDeviceStateRes,
+      UpdateDeviceStateReq
     >({
-      query: ({ id, state }) => ({
-        url: `/devices/${id}/state?toggle=${state}`,
+      query: ({ id, body }) => ({
+        url: `/devices/${id}/state`,
         method: 'PUT',
+        body,
       }),
       invalidatesTags: (_result, _error, arg) => [
         { type: 'Device', id: arg.id },
@@ -192,7 +193,7 @@ export const {
   useRegisterMutation,
   useAddDeviceMutation,
   useUpdateDeviceMutation,
-  useToggleDeviceOnOffMutation,
+  useUpdateDeviceStateMutation,
   useDeleteDeviceMutation,
   useUpdateUserMutation,
   useUploadUserAvatarMutation,

@@ -10,10 +10,13 @@ export type FavoriteDeviceRes = {
 }
 export type FavoriteDeviceReq = { id: Device['id'] }
 
-export type ToggleDeviceOnOffRes = {
-  on: boolean
+export type UpdateDeviceStateRes = Device
+export type UpdateDeviceStateReq = {
+  id: Device['id']
+  body: {
+    capabilities: Partial<Device['capabilities']>
+  }
 }
-export type ToggleDeviceOnOffReq = { id: Device['id']; state: 'on' | 'off' }
 
 export type DeviceDeleteRes = {
   ok: boolean

@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { getTurnedOnState, getOnOffText } from 'src/components/DeviceCard'
 import Switch from 'src/components/Switch'
 import { LightBulb, Kettle, Thermostat } from '@smart-home/db/types'
-import { useToggleDeviceOnOffMutation } from 'src/api/index'
+import { DeviceCapabilityType } from '@smart-home/db'
+import { useUpdateDeviceStateMutation } from 'src/api/index'
 import { useSnackbar } from 'src/hooks/useSnackbar'
 
 const Root = styled('div')({
@@ -38,7 +39,7 @@ const OnOffButton = styled('label')(({ theme }) => ({
 const OnOff: React.FC<{
   device: LightBulb | Kettle | Thermostat
 }> = ({ device }) => {
-  const [toggle] = useToggleDeviceOnOffMutation()
+  const [updateDeviceState] = useUpdateDeviceStateMutation()
   const [isTurnedOn, setTurnedOn] = useState(getTurnedOnState(device))
   const { showSnackbar, SnackbarComponent } = useSnackbar()
 
@@ -47,10 +48,23 @@ const OnOff: React.FC<{
     checked: boolean
   ) => {
     setTurnedOn(checked)
-    toggle({ id: device.id, state: checked ? 'on' : 'off' })
+    updateDeviceState({
+      id: device.id,
+      body: {
+        capabilities: {
+          [DeviceCapabilityType.ON_OFF]: {
+            type: DeviceCapabilityType.ON_OFF,
+            state: {
+              instance: 'on',
+              value: checked,
+            },
+          },
+        },
+      },
+    })
       .unwrap()
       .then((data) => {
-        setTurnedOn(data.on)
+        setTurnedOn(getTurnedOnState(data as LightBulb))
       })
       .catch((e) => {
         showSnackbar(

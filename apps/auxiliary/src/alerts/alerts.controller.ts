@@ -6,6 +6,7 @@
 import { Controller } from '@nestjs/common'
 import { EventPattern, Payload } from '@nestjs/microservices'
 import { AlertsService } from './alerts.service'
+import { DeviceCapabilities } from '@smart-home/db'
 
 @Controller()
 export class AlertsController {
@@ -13,9 +14,18 @@ export class AlertsController {
 
   @EventPattern('device.state.changed')
   handleStateChanged(
-    @Payload() data: { userId: string; deviceId: string; on: boolean }
+    @Payload()
+    data: {
+      userId: string
+      deviceId: string
+      capabilities: DeviceCapabilities
+    }
   ) {
-    this.alertsService.logStateChanged(data.userId, data.deviceId, data.on)
+    this.alertsService.logStateChanged(
+      data.userId,
+      data.deviceId,
+      data.capabilities
+    )
   }
 
   @EventPattern('device.favorite.changed')

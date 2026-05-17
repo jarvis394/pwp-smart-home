@@ -9,7 +9,6 @@ import {
   Delete,
   Get,
   NotFoundException,
-  BadRequestException,
   Param,
   Post,
   Put,
@@ -23,6 +22,7 @@ import { JwtAuthGuard } from '../auth/strategies/jwt.strategy'
 import { UserOwnershipGuard } from '../auth/guards/user-ownership.guard'
 import { CreateDeviceDto } from './dto/create-device.dto'
 import { UpdateDeviceDto } from './dto/update-device.dto'
+import { UpdateDeviceStateDto } from './dto/update-device-state.dto'
 import {
   ApiBearerAuth,
   ApiBody,
@@ -182,8 +182,8 @@ export class DevicesController {
   }
 
   @Put(':device_id/state')
-  @ApiOperation({ summary: 'Toggle power state' })
-  @ApiQuery({ name: 'toggle', required: true, enum: ['on', 'off'] })
+  @ApiOperation({ summary: 'Update device capabilities state' })
+  @ApiBody({ type: UpdateDeviceStateDto })
   @ApiResponse({ status: 200, description: 'State changed' })
   /**
    * Sets a specific state for an specific deviceId.
@@ -192,21 +192,18 @@ export class DevicesController {
    * @async
    * @param {string} userId - UUID credentials of the device owner
    * @param {string} deviceId - UUID value for the device
-   * @param {string} toggle - on/off state
-   * @throws {BadRequestException} - if input is missing
-   * @returns {Promise<boolean>} - True if state is active
+   * @param {UpdateDeviceStateDto} body - body containing new capability values
+   * @returns {Promise<Device>} - Updated device
    */
   async setState(
     @Param('user_id') userId: string,
     @Param('device_id') deviceId: string,
-    @Query('toggle') toggle: 'on' | 'off'
+    @Body() body: UpdateDeviceStateDto
   ) {
-    if (!toggle || (toggle !== 'on' && toggle !== 'off'))
-      throw new BadRequestException('Invalid toggle parameter')
     const result = await this.devicesService.setState(
       userId,
       deviceId,
-      toggle === 'on'
+      body.capabilities
     )
     await this.invalidateDeviceCaches(userId)
     return result

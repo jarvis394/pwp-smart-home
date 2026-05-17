@@ -82,13 +82,17 @@ export class DevicesController {
 
   @MessagePattern({ cmd: 'setDeviceState' })
   async setDeviceState(
-    @Payload() data: DataWithUserID & { deviceId: string; on: boolean }
+    @Payload()
+    data: DataWithUserID & {
+      deviceId: string
+      capabilities: Partial<Device['capabilities']>
+    }
   ) {
-    const state = await this.devicesService.setDeviceState(
+    const device = await this.devicesService.setDeviceState(
       data.userId,
       data.deviceId,
-      data.on
+      data.capabilities
     )
-    return { on: state }
+    return device
   }
 }

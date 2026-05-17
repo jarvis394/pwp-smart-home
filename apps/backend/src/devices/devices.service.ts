@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs'
 import { Device } from '@smart-home/db/schema'
 import { CreateDeviceDto } from './dto/create-device.dto'
 import { UpdateDeviceDto } from './dto/update-device.dto'
+import { DeviceCapabilitiesDto } from './dto/capabilities.dto'
 
 @Injectable()
 export class DevicesService {
@@ -93,10 +94,13 @@ export class DevicesService {
   async setState(
     userId: string,
     deviceId: string,
-    on: boolean
-  ): Promise<{ on: boolean }> {
+    capabilities: DeviceCapabilitiesDto
+  ): Promise<Device> {
     return await firstValueFrom(
-      this.client.send({ cmd: 'setDeviceState' }, { userId, deviceId, on })
+      this.client.send(
+        { cmd: 'setDeviceState' },
+        { userId, deviceId, capabilities }
+      )
     )
   }
 

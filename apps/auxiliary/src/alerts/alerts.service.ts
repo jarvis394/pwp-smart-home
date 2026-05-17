@@ -4,6 +4,7 @@
  * Keeps track of user actions, device additions, and deletions with timestamps
  */
 import { Injectable, Logger } from '@nestjs/common'
+import { DeviceCapabilities } from '@smart-home/db'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 
@@ -23,11 +24,15 @@ export class AlertsService {
     }
   }
 
-  logStateChanged(userId: string, deviceId: string, on: boolean) {
+  logStateChanged(
+    userId: string,
+    deviceId: string,
+    capabilities: DeviceCapabilities
+  ) {
     void this.write(
-      `DEVICE STATE CHANGED - Device: ${deviceId} | User: ${userId} | State: ${
-        on ? 'ON' : 'OFF'
-      }`
+      `DEVICE STATE CHANGED - Device: ${deviceId} | User: ${userId} | State: ${JSON.stringify(
+        capabilities
+      )}`
     )
   }
 
