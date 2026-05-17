@@ -21,6 +21,18 @@ import {
   UserDeleteRes,
   UpdateDeviceReq,
   UpdateDeviceRes,
+  ScenariosGetRes,
+  ScenariosGetReq,
+  ScenarioGetRes,
+  ScenarioGetReq,
+  ScenarioCreateRes,
+  ScenarioCreateReq,
+  ScenarioUpdateRes,
+  ScenarioUpdateReq,
+  ScenarioSetStateRes,
+  ScenarioSetStateReq,
+  ScenarioDeleteRes,
+  ScenarioDeleteReq,
 } from '@smart-home/shared'
 import { createApi } from '@reduxjs/toolkit/query/react'
 import baseQuery from './customFetchBase'
@@ -33,7 +45,7 @@ import {
 
 export const apiSlice = createApi({
   baseQuery,
-  tagTypes: ['Device', 'User', 'Favorites'],
+  tagTypes: ['Device', 'User', 'Favorites', 'Scenario'],
   endpoints: (builder) => ({
     register: builder.mutation<UserRegisterRes, UserRegisterReq>({
       query: (body) => ({
@@ -183,6 +195,65 @@ export const apiSlice = createApi({
         dispatch(setRefreshToken(null))
       },
     }),
+    getScenarios: builder.query<ScenariosGetRes, ScenariosGetReq>({
+      query: () => ({
+        url: '/scenarios',
+        method: 'GET',
+      }),
+      providesTags: (result = []) => [
+        'Scenario',
+        ...result.map((scenario) => ({
+          type: 'Scenario' as const,
+          id: scenario.id,
+        })),
+      ],
+    }),
+    getScenario: builder.query<ScenarioGetRes, ScenarioGetReq>({
+      query: ({ id }) => ({
+        url: `/scenarios/${id}`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error, arg) => [
+        { type: 'Scenario', id: arg.id },
+      ],
+    }),
+    createScenario: builder.mutation<ScenarioCreateRes, ScenarioCreateReq>({
+      query: (body) => ({
+        url: '/scenarios',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Scenario'],
+    }),
+    updateScenario: builder.mutation<ScenarioUpdateRes, ScenarioUpdateReq>({
+      query: ({ id, body }) => ({
+        url: `/scenarios/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: 'Scenario', id: arg.id },
+      ],
+    }),
+    setScenarioState: builder.mutation<
+      ScenarioSetStateRes,
+      ScenarioSetStateReq
+    >({
+      query: ({ id, active }) => ({
+        url: `/scenarios/${id}/state?active=${active}`,
+        method: 'PUT',
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: 'Scenario', id: arg.id },
+      ],
+    }),
+    deleteScenario: builder.mutation<ScenarioDeleteRes, ScenarioDeleteReq>({
+      query: ({ id }) => ({
+        url: `/scenarios/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Scenario'],
+    }),
   }),
 })
 
@@ -200,4 +271,10 @@ export const {
   useUpdateUserMutation,
   useUploadUserAvatarMutation,
   useDeleteUserMutation,
+  useGetScenariosQuery,
+  useGetScenarioQuery,
+  useCreateScenarioMutation,
+  useUpdateScenarioMutation,
+  useSetScenarioStateMutation,
+  useDeleteScenarioMutation,
 } = apiSlice

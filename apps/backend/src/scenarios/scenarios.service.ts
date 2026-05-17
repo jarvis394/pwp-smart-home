@@ -29,6 +29,7 @@ export class ScenariosService {
   async getScenarios(userId: string): Promise<Scenario[]> {
     return await this.db.query.scenarios.findMany({
       where: (fields, { eq }) => eq(fields.userId, userId),
+      orderBy: (fields, { asc }) => [asc(fields.createdAt), asc(fields.id)],
     })
   }
 

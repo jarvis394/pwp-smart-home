@@ -1,4 +1,9 @@
-import { createTheme, Theme as MUITheme } from '@mui/material'
+import {
+  createTheme,
+  Theme as MUITheme,
+  PaletteColor,
+  PaletteColorOptions,
+} from '@mui/material'
 import { CSSProperties } from 'react'
 import { BUTTON_MAX_WIDTH } from './constants'
 import { Theme } from 'src/types/Theme'
@@ -7,8 +12,26 @@ declare module '@mui/material' {
   interface TypeText {
     hint: string
   }
+  interface Palette {
+    primaryVibrant: PaletteColor
+  }
+  interface PaletteOptions {
+    primaryVibrant?: PaletteColorOptions
+  }
   interface Mixins {
     button: CSSProperties
+  }
+}
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    primaryVibrant: true
+  }
+}
+
+declare module '@mui/material/TextField' {
+  interface TextFieldPropsColorOverrides {
+    primaryVibrant: true
   }
 }
 
@@ -17,6 +40,10 @@ export const lightTheme = createTheme({
     mode: 'light',
     primary: {
       main: '#FFDC80',
+      dark: '#DDA000',
+    },
+    primaryVibrant: {
+      main: '#ebad10',
       dark: '#DDA000',
     },
     secondary: {
@@ -55,6 +82,10 @@ export const darkTheme = createTheme({
     mode: 'dark',
     primary: {
       main: '#373123',
+      dark: '#DDA000',
+    },
+    primaryVibrant: {
+      main: '#ebad10',
       dark: '#DDA000',
     },
     secondary: {

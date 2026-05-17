@@ -7,6 +7,8 @@ import {
   FavoriteBorder,
   Settings,
   SettingsOutlined,
+  AutoAwesome,
+  AutoAwesomeOutlined,
 } from '@mui/icons-material'
 import BottomNavigationAction from './BottomNavigationAction'
 import { RouteAlias } from 'src/config/routes'
@@ -28,7 +30,11 @@ const Root = styled(Paper)(({ theme }) => ({
   height: BOTTOM_NAVIGATION_HEIGHT,
 }))
 
-export type BottomNavigationItemName = 'favorites' | 'devices' | 'settings'
+export type BottomNavigationItemName =
+  | 'favorites'
+  | 'devices'
+  | 'scenarios'
+  | 'settings'
 export type BottomNavigationItem = {
   item: BottomNavigationItemName
   to: RouteAlias
@@ -56,6 +62,13 @@ const BOTTOM_NAVIGATION_ITEMS: BottomNavigationItem[] = [
     label: 'Devices',
     item: 'devices',
     to: 'devices',
+  },
+  {
+    icon: <AutoAwesomeOutlined />,
+    iconActive: <AutoAwesome />,
+    label: 'Scenarios',
+    item: 'scenarios',
+    to: 'scenarios',
   },
   {
     icon: <SettingsOutlined />,
