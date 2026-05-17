@@ -161,7 +161,7 @@ export class DevicesController {
   @ApiOperation({ summary: 'Toggle favorite' })
   @ApiResponse({
     status: 200,
-    schema: { type: 'object', properties: { favorite: { type: 'boolean' } } },
+    schema: { type: 'object', properties: { state: { type: 'boolean' } } },
   })
   /**
    * Sets a specific deviceId as favorite.
