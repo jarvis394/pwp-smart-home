@@ -5,7 +5,7 @@ import {
 } from 'drizzle-orm'
 import { pgTable, varchar, boolean, jsonb } from 'drizzle-orm/pg-core'
 
-import { defaultId, defaultJsonbValue } from '../extend'
+import { defaultId, defaultJsonbValue, timestamps } from '../extend'
 import { users } from './users'
 
 export const scenarios = pgTable('scenarios', {
@@ -20,6 +20,7 @@ export const scenarios = pgTable('scenarios', {
       onDelete: 'cascade',
       onUpdate: 'cascade',
     }),
+  ...timestamps(),
 })
 
 export const scenariosRelations = relations(scenarios, ({ one }) => ({

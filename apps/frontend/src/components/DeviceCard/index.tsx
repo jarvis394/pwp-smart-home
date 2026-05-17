@@ -105,8 +105,7 @@ const Subtitle = styled('p')(({ theme }) => ({
 
 export const getTurnedOnState = (device: LightBulb | Kettle | Thermostat) =>
   device.capabilities[DeviceCapabilityType.ON_OFF].state.value
-export const getOnOffText = (state: boolean) =>
-  state ? 'Включено' : 'Выключено'
+export const getOnOffText = (state: boolean) => (state ? 'On' : 'Off')
 export const formatTemperature = (degrees: number): string =>
   degrees > 0 ? `+${degrees}` : degrees.toString()
 
@@ -193,7 +192,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
         )}
         {isOffline && (
           <>
-            <Name>Не в сети</Name>
+            <Name>Offline</Name>
             <Subtitle sx={{ fontWeight: 500 }}>{device.name}</Subtitle>
           </>
         )}

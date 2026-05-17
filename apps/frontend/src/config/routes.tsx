@@ -19,6 +19,8 @@ export type RouteAlias =
   | 'settings'
   | 'addDevice'
   | 'deviceControls'
+  | 'scenarios'
+  | 'scenarioDetails'
   | 'login'
   | 'register'
 
@@ -36,6 +38,8 @@ const AddDevice = lazy(() => import('src/pages/AddDevice'))
 const DeviceControls = lazy(() => import('src/pages/DeviceControls'))
 const Settings = lazy(() => import('src/pages/Settings'))
 const Register = lazy(() => import('src/pages/Register'))
+const Scenarios = lazy(() => import('src/pages/Scenarios'))
+const ScenarioDetails = lazy(() => import('src/pages/ScenarioDetails'))
 
 const LazyFavorites = withSuspense(Favorites)
 const LazyDevices = withSuspense(Devices)
@@ -43,6 +47,8 @@ const LazyAddDevice = withSuspense(AddDevice)
 const LazyDeviceControls = withSuspense(DeviceControls)
 const LazySettings = withSuspense(Settings)
 const LazyRegister = withSuspense(Register)
+const LazyScenarios = withSuspense(Scenarios)
+const LazyScenarioDetails = withSuspense(ScenarioDetails)
 
 export const routes: {
   [Alias in RouteAlias]: Route<Alias>
@@ -58,6 +64,13 @@ export const routes: {
     alias: 'devices',
     path: '/devices',
     element: <LazyDevices />,
+    withBottomNavigation: true,
+    withFixedAppBar: true,
+  },
+  scenarios: {
+    alias: 'scenarios',
+    path: '/scenarios',
+    element: <LazyScenarios />,
     withBottomNavigation: true,
     withFixedAppBar: true,
   },
@@ -79,6 +92,13 @@ export const routes: {
     alias: 'deviceControls',
     path: '/controls/:id',
     element: <LazyDeviceControls />,
+    withBottomNavigation: false,
+    withFixedAppBar: true,
+  },
+  scenarioDetails: {
+    alias: 'scenarioDetails',
+    path: '/scenarios/:id',
+    element: <LazyScenarioDetails />,
     withBottomNavigation: false,
     withFixedAppBar: true,
   },

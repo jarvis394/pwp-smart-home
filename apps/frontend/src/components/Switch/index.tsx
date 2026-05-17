@@ -17,7 +17,7 @@ const Root = styled(MUISwitch)(({ theme }) => ({
     margin: 4,
   },
   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-    background: theme.palette.primary.main,
+    background: theme.palette.primaryVibrant.main,
     opacity: 1,
     boxShadow: '0 0 0 0px inset ' + alpha(theme.palette.text.primary, 0),
   },

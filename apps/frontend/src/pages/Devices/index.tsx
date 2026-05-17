@@ -127,7 +127,7 @@ const Devices: React.FC = () => {
             type="search"
             onChange={(e) => setQuery(e.target.value)}
             value={query}
-            placeholder="Поиск"
+            placeholder="Search"
             startAdornment={
               <InputAdornment position="start">
                 <Search />
