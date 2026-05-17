@@ -19,6 +19,7 @@ import { FetchingState } from 'src/types/FetchingState'
 import { logout } from 'src/store/auth'
 import { useLogoutMutation } from 'src/api/index'
 import UserAvatar from '../UserAvatar'
+import { useSnackbar } from 'src/hooks/useSnackbar'
 
 const ModalContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -110,6 +111,7 @@ const AddDeviceAndAvatar: React.FC = () => {
   const user = useAppSelector((store) => store.auth.user)
   const userFetchState = useAppSelector((store) => store.auth.state)
   const dispatch = useAppDispatch()
+  const { showSnackbar, SnackbarComponent } = useSnackbar()
 
   const handleOpen = () => {
     if (userFetchState === FetchingState.FULFILLED) {
@@ -122,11 +124,20 @@ const AddDeviceAndAvatar: React.FC = () => {
   }
 
   const handleLogout = () => {
-    logoutRequest().then(() => {
-      setOpen(false)
-      dispatch(logout())
-      navigate(getRouteByAlias('login').path)
-    })
+    logoutRequest()
+      .unwrap()
+      .then(() => {
+        setOpen(false)
+        dispatch(logout())
+        showSnackbar('Logout successful', 'success')
+        navigate(getRouteByAlias('login').path)
+      })
+      .catch((error) => {
+        showSnackbar(
+          error?.data?.message || error?.message || 'Logout failed',
+          'error'
+        )
+      })
   }
 
   const goToAddDevice = () => {
@@ -201,6 +212,7 @@ const AddDeviceAndAvatar: React.FC = () => {
           </ModalContainer>
         </Fade>
       </Modal>
+      {SnackbarComponent}
     </>
   )
 }

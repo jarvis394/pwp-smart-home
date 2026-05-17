@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs'
 import { Device } from '@smart-home/db/schema'
 import { CreateDeviceDto } from './dto/create-device.dto'
 import { UpdateDeviceDto } from './dto/update-device.dto'
+import { DeviceCapabilitiesDto } from './dto/capabilities.dto'
 
 @Injectable()
 export class DevicesService {
@@ -25,6 +26,18 @@ export class DevicesService {
   async getDevices(userId: string, roomId?: string): Promise<Device[]> {
     return await firstValueFrom(
       this.client.send({ cmd: 'getDevices' }, { userId, roomId })
+    )
+  }
+
+  /**
+   * Gets a singular device
+   * @async
+   * @param {string} userId - UUID credentials of the devices owner
+   * @returns {Promise<Device>} - Object of device
+   */
+  async getDevice(userId: string, deviceId: string): Promise<Device> {
+    return await firstValueFrom(
+      this.client.send({ cmd: 'getDevice' }, { userId, deviceId })
     )
   }
 
@@ -63,11 +76,11 @@ export class DevicesService {
   async toggleFavorite(
     userId: string,
     deviceId: string
-  ): Promise<{ favorite: boolean }> {
+  ): Promise<{ state: boolean }> {
     const { state } = await firstValueFrom(
       this.client.send({ cmd: 'toggleFavoriteDevice' }, { userId, deviceId })
     )
-    return { favorite: state }
+    return { state }
   }
 
   /**
@@ -81,10 +94,13 @@ export class DevicesService {
   async setState(
     userId: string,
     deviceId: string,
-    on: boolean
-  ): Promise<{ on: boolean }> {
+    capabilities: DeviceCapabilitiesDto
+  ): Promise<Device> {
     return await firstValueFrom(
-      this.client.send({ cmd: 'setDeviceState' }, { userId, deviceId, on })
+      this.client.send(
+        { cmd: 'setDeviceState' },
+        { userId, deviceId, capabilities }
+      )
     )
   }
 

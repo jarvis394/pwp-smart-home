@@ -27,6 +27,15 @@ export class DevicesController {
     return { devices }
   }
 
+  @MessagePattern({ cmd: 'getDevice' })
+  async getDevice(@Payload() data: DataWithUserID & { deviceId: string }) {
+    const device = await this.devicesService.getDevice(
+      data.userId,
+      data.deviceId
+    )
+    return device
+  }
+
   @MessagePattern({ cmd: 'getFavoriteDevices' })
   async getFavoriteDevices(@Payload() data: DataWithUserID) {
     const devices = await this.devicesService.getFavoriteDevices(data.userId)
@@ -73,13 +82,17 @@ export class DevicesController {
 
   @MessagePattern({ cmd: 'setDeviceState' })
   async setDeviceState(
-    @Payload() data: DataWithUserID & { deviceId: string; on: boolean }
+    @Payload()
+    data: DataWithUserID & {
+      deviceId: string
+      capabilities: Partial<Device['capabilities']>
+    }
   ) {
-    const state = await this.devicesService.setDeviceState(
+    const device = await this.devicesService.setDeviceState(
       data.userId,
       data.deviceId,
-      data.on
+      data.capabilities
     )
-    return { on: state }
+    return device
   }
 }

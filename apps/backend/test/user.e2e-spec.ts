@@ -175,6 +175,37 @@ describe('User (e2e)', () => {
     expect(res.status).toBe(403)
   })
 
+  it('DELETE /api/user/:user_id - 403: forbidden (different user)', async () => {
+    const res = await request(app.getHttpServer())
+      .delete('/api/user/00000000-0000-0000-0000-000000000000')
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(403)
+  })
+
+  it('DELETE /api/user/:user_id - 200: delete user', async () => {
+    const tempEmail = `temp_delete_${Date.now()}@test.com`
+    const registerRes = await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({
+        email: tempEmail,
+        password: 'tempPassword123',
+        firstName: 'Temp',
+        lastName: 'User',
+      })
+    expect(registerRes.status).toBe(201)
+
+    const tempToken = registerRes.body.tokens.accessToken
+    const tempUserId = registerRes.body.user.id
+
+    const res = await request(app.getHttpServer())
+      .delete(`/api/user/${tempUserId}`)
+      .set('Authorization', `Bearer ${tempToken}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.ok).toBe(true)
+  })
+
   afterAll(async () => {
     await app.close()
   })

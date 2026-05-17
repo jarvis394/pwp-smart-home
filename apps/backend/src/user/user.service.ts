@@ -114,6 +114,23 @@ export class UserService {
   }
 
   /**
+   * Deletes a user by Id
+   * @async
+   * @param {string} userId - UUID identifier for user
+   * @throws {NotFoundException} - If the user details cannot be found
+   * @returns {Promise<void>} - Success empty return
+   */
+  async deleteUser(userId: string): Promise<void> {
+    const user = await this.findById(userId)
+
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+
+    await this.db.delete(users).where(eq(users.id, userId))
+  }
+
+  /**
    * Validates a user's login against stored credentials
    * @async
    * @param {string} email -User email string
@@ -209,7 +226,7 @@ export class UserService {
    */
   async updateAvatar(
     userId: string,
-    file: Express.Multer.File
+    file: { buffer: Buffer }
   ): Promise<UserUploadAvatarRes> {
     const user = await this.findById(userId)
     const url = await this.saveFileToUploads(file.buffer)

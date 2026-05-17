@@ -9,8 +9,12 @@ import {
   IsUUID,
   IsBoolean,
   IsObject,
+  IsEnum,
+  ValidateNested,
 } from 'class-validator'
-import { DeviceCapabilities, DeviceState } from '@smart-home/db'
+import { Type } from 'class-transformer'
+import { DeviceState } from '@smart-home/db'
+import { DeviceCapabilitiesDto } from './capabilities.dto'
 
 export class CreateDeviceDto {
   @ApiProperty({ example: 'Kitchen Light' })
@@ -31,14 +35,16 @@ export class CreateDeviceDto {
   @IsBoolean()
   favorite?: boolean
 
-  @ApiPropertyOptional({ example: {} })
+  @ApiPropertyOptional({ type: DeviceCapabilitiesDto })
   @IsOptional()
   @IsObject()
-  capabilities?: DeviceCapabilities
+  @ValidateNested()
+  @Type(() => DeviceCapabilitiesDto)
+  capabilities?: DeviceCapabilitiesDto
 
-  @ApiPropertyOptional({ example: {} })
+  @ApiPropertyOptional({ enum: DeviceState, example: DeviceState.ONLINE })
   @IsOptional()
-  @IsObject()
+  @IsEnum(DeviceState)
   state?: DeviceState
 
   @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440000' })

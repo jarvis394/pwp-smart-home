@@ -20,3 +20,6 @@ export type UserUploadAvatarRes = { avatarUrl: string }
 
 export type UserUpdateReq = Partial<Pick<User, 'firstName' | 'lastName'>>
 export type UserUpdateRes = { user: ApiUser }
+
+export type UserDeleteReq = unknown
+export type UserDeleteRes = { ok: boolean }

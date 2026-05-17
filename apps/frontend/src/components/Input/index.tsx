@@ -29,6 +29,8 @@ const StyledInput = styled(Input)(({ theme }) => ({
   },
   '&.MuiInput-root .MuiInput-input': {
     padding: theme.spacing(1.5, 2),
+    height: '100%',
+    boxSizing: 'border-box',
   },
   '&.MuiInput-root.Mui-focused': {
     boxShadow: '0 0 0 2px inset ' + alpha(theme.palette.text.primary, 1),

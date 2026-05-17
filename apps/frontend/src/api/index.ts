@@ -9,22 +9,31 @@ import {
   UserRegisterRes,
   AddDeviceRes,
   AddDeviceReq,
-  ToggleDeviceOnOffRes,
-  ToggleDeviceOnOffReq,
+  UpdateDeviceStateRes,
+  UpdateDeviceStateReq,
   DeviceDeleteRes,
   DeviceDeleteReq,
   UserUploadAvatarRes,
   UserUploadAvatarReq,
   UserUpdateReq,
   UserUpdateRes,
+  UserDeleteReq,
+  UserDeleteRes,
+  UpdateDeviceReq,
+  UpdateDeviceRes,
 } from '@smart-home/shared'
 import { createApi } from '@reduxjs/toolkit/query/react'
 import baseQuery from './customFetchBase'
-import { setAccessToken, setRefreshToken, setUserAvatar } from 'src/store/auth'
+import {
+  setAccessToken,
+  setRefreshToken,
+  setUserAvatar,
+  logout,
+} from 'src/store/auth'
 
 export const apiSlice = createApi({
   baseQuery,
-  tagTypes: ['Device', 'User'],
+  tagTypes: ['Device', 'User', 'Favorites'],
   endpoints: (builder) => ({
     register: builder.mutation<UserRegisterRes, UserRegisterReq>({
       query: (body) => ({
@@ -76,11 +85,12 @@ export const apiSlice = createApi({
     }),
     getFavoritesDevices: builder.query<DevicesGetRes, DevicesGetReq>({
       query: () => ({
-        url: '/devices/favorites',
+        url: '/favorites',
         method: 'GET',
       }),
       providesTags: (result = { devices: [] }) => [
         'Device',
+        'Favorites',
         ...result.devices.map((device) => ({
           type: 'Device' as const,
           id: device.id,
@@ -93,19 +103,21 @@ export const apiSlice = createApi({
     >({
       query: ({ id }) => ({
         url: `/devices/${id}/favorite`,
-        method: 'GET',
+        method: 'PUT',
       }),
       invalidatesTags: (_result, _error, arg) => [
         { type: 'Device', id: arg.id },
+        'Favorites',
       ],
     }),
-    toggleDeviceOnOff: builder.mutation<
-      ToggleDeviceOnOffRes,
-      ToggleDeviceOnOffReq
+    updateDeviceState: builder.mutation<
+      UpdateDeviceStateRes,
+      UpdateDeviceStateReq
     >({
-      query: ({ id }) => ({
-        url: `/devices/${id}/onOff/toggle`,
-        method: 'GET',
+      query: ({ id, body }) => ({
+        url: `/devices/${id}/state`,
+        method: 'PUT',
+        body,
       }),
       invalidatesTags: (_result, _error, arg) => [
         { type: 'Device', id: arg.id },
@@ -113,26 +125,36 @@ export const apiSlice = createApi({
     }),
     deleteDevice: builder.mutation<DeviceDeleteRes, DeviceDeleteReq>({
       query: ({ id }) => ({
-        url: `/devices/${id}/delete`,
-        method: 'GET',
+        url: `/devices/${id}`,
+        method: 'DELETE',
       }),
       invalidatesTags: ['Device'],
     }),
     addDevice: builder.mutation<AddDeviceRes, AddDeviceReq>({
       query: (body) => ({
-        url: '/devices/add',
+        url: '/devices',
         method: 'POST',
         body,
       }),
       invalidatesTags: ['Device'],
+    }),
+    updateDevice: builder.mutation<UpdateDeviceRes, UpdateDeviceReq>({
+      query: ({ id, body }) => ({
+        url: `/devices/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: 'Device', id: arg.id },
+      ],
     }),
     uploadUserAvatar: builder.mutation<
       UserUploadAvatarRes,
       UserUploadAvatarReq
     >({
       query: (body) => ({
-        url: '/user/uploadAvatar',
-        method: 'POST',
+        url: '/avatar',
+        method: 'PUT',
         body,
       }),
       async onQueryStarted(_args, { dispatch, queryFulfilled }) {
@@ -143,11 +165,23 @@ export const apiSlice = createApi({
     }),
     updateUser: builder.mutation<UserUpdateRes, UserUpdateReq>({
       query: (body) => ({
-        url: '/user/update',
-        method: 'POST',
+        url: '',
+        method: 'PUT',
         body,
       }),
       invalidatesTags: ['User'],
+    }),
+    deleteUser: builder.mutation<UserDeleteRes, UserDeleteReq>({
+      query: () => ({
+        url: '',
+        method: 'DELETE',
+      }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        await queryFulfilled
+        dispatch(logout())
+        dispatch(setAccessToken(null))
+        dispatch(setRefreshToken(null))
+      },
     }),
   }),
 })
@@ -160,8 +194,10 @@ export const {
   useLogoutMutation,
   useRegisterMutation,
   useAddDeviceMutation,
-  useToggleDeviceOnOffMutation,
+  useUpdateDeviceMutation,
+  useUpdateDeviceStateMutation,
   useDeleteDeviceMutation,
   useUpdateUserMutation,
   useUploadUserAvatarMutation,
+  useDeleteUserMutation,
 } = apiSlice

@@ -99,6 +99,39 @@
             "bearer": []
           }
         ]
+      },
+      "delete": {
+        "operationId": "UserController_deleteUser",
+        "summary": "Delete user account",
+        "parameters": [
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "403": {
+            "description": "Forbidden – not your own profile"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
       }
     },
     "/api/user/{user_id}/avatar": {
@@ -490,7 +523,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "favorite": {
+                    "state": {
                       "type": "boolean"
                     }
                   }
@@ -512,7 +545,7 @@
     "/api/user/{user_id}/devices/{device_id}/state": {
       "put": {
         "operationId": "DevicesController_setState",
-        "summary": "Toggle power state",
+        "summary": "Update device capabilities state",
         "parameters": [
           {
             "name": "user_id",
@@ -529,20 +562,18 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "toggle",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "enum": [
-                "on",
-                "off"
-              ],
-              "type": "string"
-            }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDeviceStateDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "State changed"
@@ -1661,6 +1692,174 @@
           "file"
         ]
       },
+      "OnOffStateDto": {
+        "type": "object",
+        "properties": {
+          "instance": {
+            "type": "string",
+            "example": "on"
+          },
+          "value": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "instance",
+          "value"
+        ]
+      },
+      "DeviceCapabilityOnOffDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "color_setting",
+              "on_off",
+              "range",
+              "video_stream"
+            ],
+            "example": "on_off"
+          },
+          "state": {
+            "$ref": "#/components/schemas/OnOffStateDto"
+          }
+        },
+        "required": [
+          "type",
+          "state"
+        ]
+      },
+      "VideoStreamStateValueDto": {
+        "type": "object",
+        "properties": {
+          "streamUrl": {
+            "type": "string",
+            "example": "https://example.com/stream.m3u8"
+          },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "hls",
+              "mp4"
+            ],
+            "example": "hls"
+          }
+        },
+        "required": [
+          "streamUrl",
+          "protocol"
+        ]
+      },
+      "VideoStreamStateDto": {
+        "type": "object",
+        "properties": {
+          "instance": {
+            "type": "string",
+            "example": "get_stream"
+          },
+          "value": {
+            "$ref": "#/components/schemas/VideoStreamStateValueDto"
+          }
+        },
+        "required": [
+          "instance",
+          "value"
+        ]
+      },
+      "DeviceCapabilityVideoStreamDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "color_setting",
+              "on_off",
+              "range",
+              "video_stream"
+            ],
+            "example": "video_stream"
+          },
+          "state": {
+            "$ref": "#/components/schemas/VideoStreamStateDto"
+          }
+        },
+        "required": [
+          "type",
+          "state"
+        ]
+      },
+      "ColorSettingStateDto": {
+        "type": "object",
+        "properties": {
+          "instance": {
+            "type": "string",
+            "enum": [
+              "hsv",
+              "temperature_k"
+            ],
+            "example": "hsv"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "number",
+                "example": 4500
+              },
+              {
+                "$ref": "#/components/schemas/ColorSettingHsvValueDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "instance",
+          "value"
+        ]
+      },
+      "DeviceCapabilityColorSettingDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "color_setting",
+              "on_off",
+              "range",
+              "video_stream"
+            ],
+            "example": "color_setting"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ColorSettingStateDto"
+          }
+        },
+        "required": [
+          "type",
+          "state"
+        ]
+      },
+      "DeviceCapabilitiesDto": {
+        "type": "object",
+        "properties": {
+          "on_off": {
+            "$ref": "#/components/schemas/DeviceCapabilityOnOffDto"
+          },
+          "video_stream": {
+            "$ref": "#/components/schemas/DeviceCapabilityVideoStreamDto"
+          },
+          "color_setting": {
+            "$ref": "#/components/schemas/DeviceCapabilityColorSettingDto"
+          },
+          "range": {
+            "type": "object",
+            "example": {
+
+            }
+          }
+        }
+      },
       "Device": {
         "type": "object",
         "properties": {
@@ -1673,14 +1872,12 @@
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "state": {
-            "type": "integer",
-            "example": 0
+            "type": "number",
+            "example": 0,
+            "enum": [0, 1]
           },
           "capabilities": {
-            "type": "object",
-            "example": {
-
-            }
+            "$ref": "#/components/schemas/DeviceCapabilitiesDto"
           },
           "favorite": {
             "type": "boolean",
@@ -1694,7 +1891,8 @@
           "model": {
             "type": "string",
             "example": "Xiaomi TL-45",
-            "description": "The specific hardware model"
+            "description": "The specific hardware model",
+            "nullable": true
           },
           "type": {
             "type": "string",
@@ -1712,7 +1910,8 @@
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000",
             "format": "uuid",
-            "description": "The ID of the room where this device is located"
+            "description": "The ID of the room where this device is located",
+            "nullable": true
           }
         },
         "required": [
@@ -1729,16 +1928,32 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "example": "Kitchen Light"
           },
           "model": {
-            "type": "string"
+            "type": "string",
+            "example": "Xiaomi TL-45"
           },
           "type": {
-            "type": "string"
+            "type": "string",
+            "example": "Light"
+          },
+          "favorite": {
+            "type": "boolean",
+            "example": false
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/DeviceCapabilitiesDto"
+          },
+          "state": {
+            "type": "number",
+            "enum": [0, 1],
+            "example": 0
           },
           "roomId": {
-            "type": "string"
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           }
         },
         "required": [
@@ -1751,7 +1966,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "New name for the device"
+            "description": "New device name"
           },
           "model": {
             "type": "string",
@@ -1761,11 +1976,40 @@
             "type": "string",
             "description": "New device type"
           },
+          "favorite": {
+            "type": "boolean",
+            "description": "Toggle favorite status"
+          },
+          "capabilities": {
+            "description": "Update device capabilities",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeviceCapabilitiesDto"
+              }
+            ]
+          },
+          "state": {
+            "type": "number",
+            "description": "Update device state",
+            "enum": [0, 1],
+            "example": 0
+          },
           "roomId": {
             "type": "string",
-            "description": "Move the device to a different room (room UUID)"
+            "description": "Move device to a different room (UUID)"
           }
         }
+      },
+      "UpdateDeviceStateDto": {
+        "type": "object",
+        "properties": {
+          "capabilities": {
+            "$ref": "#/components/schemas/DeviceCapabilitiesDto"
+          }
+        },
+        "required": [
+          "capabilities"
+        ]
       },
       "LoginDto": {
         "type": "object",

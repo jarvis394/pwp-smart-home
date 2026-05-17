@@ -2,8 +2,14 @@ import { alpha, styled } from '@mui/material'
 import { useState } from 'react'
 import { getTurnedOnState, getOnOffText } from 'src/components/DeviceCard'
 import Switch from 'src/components/Switch'
-import { LightBulb, Kettle, Thermostat } from '@smart-home/db/types'
-import { useToggleDeviceOnOffMutation } from 'src/api/index'
+import {
+  LightBulb,
+  Kettle,
+  Thermostat,
+  DeviceCapabilityType,
+} from '@smart-home/db/types'
+import { useUpdateDeviceStateMutation } from 'src/api/index'
+import { useSnackbar } from 'src/hooks/useSnackbar'
 
 const Root = styled('div')({
   display: 'flex',
@@ -37,32 +43,57 @@ const OnOffButton = styled('label')(({ theme }) => ({
 const OnOff: React.FC<{
   device: LightBulb | Kettle | Thermostat
 }> = ({ device }) => {
-  const [toggle] = useToggleDeviceOnOffMutation()
+  const [updateDeviceState] = useUpdateDeviceStateMutation()
   const [isTurnedOn, setTurnedOn] = useState(getTurnedOnState(device))
+  const { showSnackbar, SnackbarComponent } = useSnackbar()
 
   const handleOnOffChange = (
     _event: React.ChangeEvent<HTMLInputElement>,
     checked: boolean
   ) => {
     setTurnedOn(checked)
-    toggle({ id: device.id })
+    updateDeviceState({
+      id: device.id,
+      body: {
+        capabilities: {
+          [DeviceCapabilityType.ON_OFF]: {
+            type: DeviceCapabilityType.ON_OFF,
+            state: {
+              instance: 'on',
+              value: checked,
+            },
+          },
+        },
+      },
+    })
       .unwrap()
       .then((data) => {
-        setTurnedOn(data.state)
+        setTurnedOn(getTurnedOnState(data as LightBulb))
+      })
+      .catch((e) => {
+        showSnackbar(
+          e?.data?.message || e?.message || 'Failed to toggle device state',
+          'error'
+        )
+        setTurnedOn(!checked)
       })
   }
 
   return (
-    <Root>
-      <OnOffButton htmlFor="on-off-switch">
-        {getOnOffText(isTurnedOn)}
-        <Switch
-          onChange={handleOnOffChange}
-          checked={isTurnedOn}
-          id="on-off-switch"
-        />
-      </OnOffButton>
-    </Root>
+    <>
+      <Root>
+        <OnOffButton htmlFor="on-off-switch">
+          {getOnOffText(isTurnedOn)}
+          <Switch
+            onChange={handleOnOffChange}
+            checked={isTurnedOn}
+            inputProps={{ 'aria-label': 'controlled' }}
+            id="on-off-switch"
+          />
+        </OnOffButton>
+      </Root>
+      {SnackbarComponent}
+    </>
   )
 }
 

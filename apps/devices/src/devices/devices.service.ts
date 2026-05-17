@@ -8,11 +8,17 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { AddDeviceReq } from '@smart-home/shared'
 import { Device, devices, User } from '@smart-home/db/schema'
-import { and, eq } from '@smart-home/db'
+import {
+  and,
+  eq,
+  DeviceCapabilityType,
+  DeviceCapabilities,
+} from '@smart-home/db'
 import { DrizzleAsyncProvider, Database } from '../db/drizzle.module'
 
 @Injectable()
@@ -34,12 +40,15 @@ export class DevicesService {
       type: deviceDocument.type,
       model: deviceDocument.model,
       roomId: deviceDocument.roomId,
+      createdAt: deviceDocument.createdAt,
+      updatedAt: deviceDocument.updatedAt,
     }
   }
 
   async getDevices(userId: User['id']): Promise<Device[]> {
     const devices = await this.db.query.devices.findMany({
       where: (fields, { eq }) => eq(fields.userId, userId),
+      orderBy: (fields, { asc }) => [asc(fields.createdAt), asc(fields.id)],
     })
     return devices.map((device) => this.serializeDevice(device))
   }
@@ -72,6 +81,7 @@ export class DevicesService {
     const devices = await this.db.query.devices.findMany({
       where: (fields, { eq, and }) =>
         and(eq(fields.userId, userId), eq(fields.favorite, true)),
+      orderBy: (fields, { asc }) => [asc(fields.createdAt), asc(fields.id)],
     })
     return devices.map((device) => this.serializeDevice(device))
   }
@@ -177,21 +187,54 @@ export class DevicesService {
   async setDeviceState(
     userId: User['id'],
     deviceId: Device['id'],
-    on: boolean
-  ): Promise<boolean> {
+    capabilities: Partial<Device['capabilities']>
+  ): Promise<Device> {
     const device = await this.getDevice(userId, deviceId)
-    if (!device?.capabilities.on_off) {
-      throw new ForbiddenException('Unsupported device feature')
+    if (!device) {
+      throw new NotFoundException('Device not found')
     }
 
-    device.capabilities.on_off.state.value = on
+    const updatedCapabilities = { ...device.capabilities }
 
-    await this.updateDevice(userId, deviceId, {
-      capabilities: device.capabilities,
+    const supportedCapabilities = [
+      DeviceCapabilityType.ON_OFF,
+      DeviceCapabilityType.COLOR_SETTING,
+    ] as const
+
+    type SupportedCapability = NonNullable<
+      DeviceCapabilities[(typeof supportedCapabilities)[number]]
+    >
+
+    for (const capType of supportedCapabilities) {
+      const capUpdate = capabilities[capType]
+      if (!capUpdate?.state) continue
+
+      if (!updatedCapabilities[capType]) {
+        throw new ForbiddenException(`Unsupported device feature: ${capType}`)
+      }
+
+      const cap = { ...updatedCapabilities[capType] } as SupportedCapability
+      cap.state = {
+        ...cap.state,
+        ...capUpdate.state,
+      }
+      updatedCapabilities[capType] = cap as never
+    }
+
+    const updatedDevice = await this.updateDevice(userId, deviceId, {
+      capabilities: updatedCapabilities,
     })
 
-    this.alertsClient.emit('device.state.changed', { userId, deviceId, on })
+    if (!updatedDevice) {
+      throw new NotFoundException('Device not found')
+    }
 
-    return on
+    this.alertsClient.emit('device.state.changed', {
+      userId,
+      deviceId,
+      capabilities: updatedCapabilities,
+    })
+
+    return this.serializeDevice(updatedDevice)
   }
 }

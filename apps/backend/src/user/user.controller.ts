@@ -27,6 +27,7 @@ import {
   UserGetSelfRes,
   UserUpdateRes,
   UserUploadAvatarRes,
+  UserDeleteRes,
 } from '@smart-home/shared'
 import { JwtAuthGuard } from '../auth/strategies/jwt.strategy'
 import { UserOwnershipGuard } from '../auth/guards/user-ownership.guard'
@@ -245,6 +246,26 @@ export class UserController {
     const cacheKey = UserController.getSelfCacheKey(user_id)
     await this.cacheManager.del(cacheKey)
     return { message: 'Avatar deleted' }
+  }
+
+  @UseGuards(JwtAuthGuard, UserOwnershipGuard)
+  @Delete(':user_id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete user account' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden – not your own profile' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  /**
+   * Deletes a user account completely
+   * @async
+   * @param {string} userId - UUID credentials of the user
+   * @returns {Promise<UserDeleteRes>} - Confirmation object
+   */
+  async deleteUser(@Param('user_id') user_id: string): Promise<UserDeleteRes> {
+    await this.userService.deleteUser(user_id)
+    const cacheKey = UserController.getSelfCacheKey(user_id)
+    await this.cacheManager.del(cacheKey)
+    return { ok: true }
   }
 
   public static getSelfCacheKey(userId: string): string {

@@ -43,12 +43,67 @@ const customFetchBase: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   await mutex.waitForUnlock()
 
-  let result = await baseQuery(args, api, extraOptions)
+  let url = typeof args === 'string' ? args : args?.url
 
-  if ((result.error?.data as ApiErrorMessage)?.statusCode === 401) {
+  const state = api.getState() as RootState
+  let userId = state.auth.user?.id
+
+  const token = state.auth.accessToken
+  if (!userId && token) {
+    try {
+      const payload = token.split('.')[1]
+      if (payload) {
+        userId = JSON.parse(atob(payload)).sub
+      }
+    } catch (e) {
+      // Ignore parse error
+    }
+  }
+
+  const isAuthRequest =
+    url === '/auth/login' ||
+    url === '/auth/register' ||
+    url === '/auth/logout' ||
+    url === '/auth/refresh'
+
+  if (
+    userId &&
+    !isAuthRequest &&
+    typeof url === 'string' &&
+    !url.startsWith('/user/')
+  ) {
+    url = `/user/${userId}${url}`
+  }
+
+  let finalArgs = args
+  if (typeof args === 'string') {
+    finalArgs = url
+  } else if (args) {
+    finalArgs = { ...args, url }
+  }
+
+  let result = await baseQuery(finalArgs, api, extraOptions)
+
+  if (
+    (result.error?.data as ApiErrorMessage)?.statusCode === 401 &&
+    !isAuthRequest
+  ) {
     if (!mutex.isLocked()) {
       const release = await mutex.acquire()
       const refreshToken = (api.getState() as RootState).auth.refreshToken
+
+      if (!refreshToken) {
+        api.dispatch(logout())
+        if (
+          typeof window !== 'undefined' &&
+          window.location.pathname !== getRouteByAlias('login').path &&
+          window.location.pathname !== getRouteByAlias('register').path
+        ) {
+          window.location.href = getRouteByAlias('login').path
+        }
+        release()
+        return result
+      }
 
       try {
         const refreshResult = await baseQuery(
@@ -78,14 +133,20 @@ const customFetchBase: BaseQueryFn<
           )
         } else {
           api.dispatch(logout())
-          window.location.href = getRouteByAlias('login').path
+          if (
+            typeof window !== 'undefined' &&
+            window.location.pathname !== getRouteByAlias('login').path &&
+            window.location.pathname !== getRouteByAlias('register').path
+          ) {
+            window.location.href = getRouteByAlias('login').path
+          }
         }
       } finally {
         release()
       }
     } else {
       await mutex.waitForUnlock()
-      result = await baseQuery(args, api, extraOptions)
+      result = await baseQuery(finalArgs, api, extraOptions)
     }
   }
 

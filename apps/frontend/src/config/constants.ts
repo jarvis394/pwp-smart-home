@@ -7,3 +7,9 @@ export const LOCAL_STORAGE_PREFIX = 'smart-home_'
 export const ACCESS_TOKEN_KEY = LOCAL_STORAGE_PREFIX + 'accessToken'
 export const REFRESH_TOKEN_KEY = LOCAL_STORAGE_PREFIX + 'refreshToken'
 export const THEME_KEY = LOCAL_STORAGE_PREFIX + 'theme'
+
+export const ACCEPTED_IMAGE_FILE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]

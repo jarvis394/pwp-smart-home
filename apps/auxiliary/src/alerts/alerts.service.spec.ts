@@ -6,6 +6,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { AlertsService } from './alerts.service'
 import * as fsPromises from 'fs/promises'
+import { DeviceCapabilities } from '@smart-home/db'
 
 jest.mock('fs/promises')
 
@@ -29,7 +30,15 @@ describe('AlertsService', () => {
   })
 
   it('logStateChanged - writes ON state to log file', () => {
-    service.logStateChanged('user-1', 'device-1', true)
+    service.logStateChanged('user-1', 'device-1', {
+      on_off: {
+        type: 'on_off',
+        state: {
+          instance: 'on',
+          value: true,
+        },
+      },
+    } as DeviceCapabilities)
     expect(fsPromises.appendFile).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining('DEVICE STATE CHANGED'),
@@ -37,16 +46,24 @@ describe('AlertsService', () => {
     )
     expect(fsPromises.appendFile).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining('State: ON'),
+      expect.stringContaining('"value":true'),
       expect.any(Object)
     )
   })
 
   it('logStateChanged - writes OFF state to log file', () => {
-    service.logStateChanged('user-1', 'device-1', false)
+    service.logStateChanged('user-1', 'device-1', {
+      on_off: {
+        type: 'on_off',
+        state: {
+          instance: 'on',
+          value: false,
+        },
+      },
+    } as DeviceCapabilities)
     expect(fsPromises.appendFile).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining('State: OFF'),
+      expect.stringContaining('"value":false'),
       expect.any(Object)
     )
   })

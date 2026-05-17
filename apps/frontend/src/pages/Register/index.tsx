@@ -12,6 +12,7 @@ import { useAppDispatch } from 'src/store/index'
 import { setUser, setUserFetchingState } from 'src/store/auth'
 import { FetchingState } from 'src/types/FetchingState'
 import { useRegisterMutation } from 'src/api/index'
+import { useSnackbar } from 'src/hooks/useSnackbar'
 
 const Root = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -71,6 +72,7 @@ const Register: React.FC = () => {
   }>()
   const dispatch = useAppDispatch()
   const [registerUser, { isLoading }] = useRegisterMutation()
+  const { showSnackbar, SnackbarComponent } = useSnackbar()
 
   const onSubmit = () => {
     const { email, password, firstName, lastName } = getValues()
@@ -91,11 +93,17 @@ const Register: React.FC = () => {
     })
       .unwrap()
       .then((data) => {
+        console.log('Register success:', data)
         dispatch(setUser(data.user))
         dispatch(setUserFetchingState(FetchingState.FULFILLED))
+        showSnackbar('Registration successful', 'success')
         navigate(getRouteByAlias('favorites').path)
       })
-      .catch(() => {
+      .catch((error) => {
+        showSnackbar(
+          error?.data?.message || error?.message || 'Registration failed',
+          'error'
+        )
         return reject()
       })
   }
@@ -160,8 +168,9 @@ const Register: React.FC = () => {
           Log in
         </Button>
       </Root>
+      {SnackbarComponent}
     </>
   )
 }
 
-export default Register
+export default React.memo(Register)

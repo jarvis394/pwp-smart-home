@@ -24,7 +24,15 @@ describe('Devices (e2e)', () => {
     type: 'Light',
     favorite: false,
     state: 'ONLINE',
-    capabilities: {},
+    capabilities: {
+      on_off: {
+        type: 'on_off',
+        state: {
+          instance: 'on',
+          value: false,
+        },
+      },
+    },
     userId: '',
     roomId: null,
   }
@@ -35,11 +43,15 @@ describe('Devices (e2e)', () => {
     })
       .overrideProvider('DEVICES_SERVICE')
       .useValue({
-        send: jest.fn().mockImplementation((pattern) => {
-          console.log('Mock send called with:', pattern)
+        send: jest.fn().mockImplementation((pattern, data) => {
+          console.log('Mock send called with:', pattern, data)
           switch (pattern.cmd) {
             case 'getDevices':
               return of([mockDevice])
+            case 'getDevice':
+              return data && data.deviceId === 'mock-1'
+                ? of(mockDevice)
+                : of(null)
             case 'getFavoriteDevices':
               return of([mockDevice])
             case 'addDevice':
@@ -47,7 +59,18 @@ describe('Devices (e2e)', () => {
             case 'toggleFavoriteDevice':
               return of({ state: true })
             case 'setDeviceState':
-              return of({ on: true })
+              return of({
+                ...mockDevice,
+                capabilities: {
+                  on_off: {
+                    type: 'on_off',
+                    state: {
+                      instance: 'on',
+                      value: true,
+                    },
+                  },
+                },
+              })
             case 'deleteDevice':
               return of(true)
             default:
@@ -122,6 +145,24 @@ describe('Devices (e2e)', () => {
     expect(res.body[0].id).toBeDefined()
   })
 
+  it('GET /api/user/{user_id}/devices/{device_id} - 200: return single device', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/user/${userId}/devices/mock-1`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.id).toBe('mock-1')
+    expect(res.body.name).toBe('Mock Device')
+  })
+
+  it('GET /api/user/{user_id}/devices/{device_id} - 404: device not found', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/user/${userId}/devices/non-existent`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(404)
+  })
+
   it('GET /api/user/{user_id}/favorites - 200: return favorites', async () => {
     const res = await request(app.getHttpServer())
       .get(`/api/user/${userId}/favorites`)
@@ -142,13 +183,24 @@ describe('Devices (e2e)', () => {
     expect(res.body.name).toBe('New Device')
   })
 
-  it('PUT /api/user/{user_id}/devices/{device_id}/state?toggle=on - 200: toggle state', async () => {
+  it('PUT /api/user/{user_id}/devices/{device_id}/state - 200: toggle state', async () => {
     const res = await request(app.getHttpServer())
-      .put(`/api/user/${userId}/devices/mock-1/state?toggle=on`)
+      .put(`/api/user/${userId}/devices/mock-1/state`)
       .set('Authorization', `Bearer ${token}`)
+      .send({
+        capabilities: {
+          on_off: {
+            type: 'on_off',
+            state: {
+              instance: 'on',
+              value: true,
+            },
+          },
+        },
+      })
 
     expect(res.status).toBe(200)
-    expect(res.body).toHaveProperty('on')
+    expect(res.body.capabilities.on_off.state.value).toBe(true)
   })
 
   it('PUT /api/user/{user_id}/devices/{device_id}/favorite - 200: toggle favorite', async () => {
@@ -157,7 +209,7 @@ describe('Devices (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
 
     expect(res.status).toBe(200)
-    expect(res.body.favorite).toBe(true)
+    expect(res.body.state).toBe(true)
   })
 
   it('DELETE /api/user/{user_id}/devices/{device_id} - 200: delete device', async () => {
