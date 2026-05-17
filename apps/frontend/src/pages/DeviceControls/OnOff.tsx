@@ -2,8 +2,12 @@ import { alpha, styled } from '@mui/material'
 import { useState } from 'react'
 import { getTurnedOnState, getOnOffText } from 'src/components/DeviceCard'
 import Switch from 'src/components/Switch'
-import { LightBulb, Kettle, Thermostat } from '@smart-home/db/types'
-import { DeviceCapabilityType } from '@smart-home/db'
+import {
+  LightBulb,
+  Kettle,
+  Thermostat,
+  DeviceCapabilityType,
+} from '@smart-home/db/types'
 import { useUpdateDeviceStateMutation } from 'src/api/index'
 import { useSnackbar } from 'src/hooks/useSnackbar'
 

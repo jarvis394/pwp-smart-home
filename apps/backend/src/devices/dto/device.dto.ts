@@ -27,9 +27,11 @@ export class Device {
   name: string
 
   @ApiProperty({
+    type: String,
     example: 'Xiaomi TL-45',
     description: 'The specific hardware model',
     required: false,
+    nullable: true,
   })
   model?: string | null
 
@@ -41,10 +43,12 @@ export class Device {
   type: DeviceType
 
   @ApiProperty({
+    type: String,
     example: '550e8400-e29b-41d4-a716-446655440000',
     format: 'uuid',
     description: 'The ID of the room where this device is located',
     required: false,
+    nullable: true,
   })
   roomId?: string | null
 }
