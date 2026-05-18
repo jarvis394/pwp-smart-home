@@ -195,6 +195,21 @@ Whichever command is used, the report can be viewed in an html document by using
 Start-Process "apps/auxiliary/coverage/index.html"
 ```
 
+## Building
+
+Run build inside Docker:
+
+```bash
+yarn docker
+```
+
+Or build and run locally:
+
+```bash
+yarn build
+yarn start
+```
+
 ### Dependencies
 
 - TypeScript

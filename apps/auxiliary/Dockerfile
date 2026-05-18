@@ -6,7 +6,7 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY . .
-RUN yarn nx run backend:build --prod
+RUN yarn nx run auxiliary:build --prod
 
 RUN rm -rf node_modules && yarn install --frozen-lockfile --production
 
@@ -16,7 +16,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist/apps/backend ./dist
+COPY --from=builder /app/dist/apps/auxiliary ./dist
 COPY --from=builder /app/.env ./
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock ./

@@ -24,6 +24,14 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    command:
+      [
+        'bash',
+        '-c',
+        'chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server',
+      ]
     healthcheck:
       test: rabbitmq-diagnostics -q check_running
       interval: 10s
@@ -33,7 +41,7 @@ services:
   db_migrate:
     build:
       context: .
-      dockerfile: apps/backend/Dockerfile
+      dockerfile: libs/database/Dockerfile
     environment:
       DB_HOST: db
       POSTGRES_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_DATABASE}
@@ -96,7 +104,7 @@ services:
       dockerfile: apps/frontend/Dockerfile
     restart: always
     ports:
-      - '4200:4200'
+      - '4200:80'
     depends_on:
       - backend
     env_file:
@@ -130,3 +138,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:
