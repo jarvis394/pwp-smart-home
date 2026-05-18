@@ -997,7 +997,7 @@
       "get": {
         "operationId": "RoomsController_getRooms",
         "summary": "List rooms of a user",
-        "description": "Returns all rooms belonging to a user. Optionally filter by apartment (?apartment=apartment_id) and/or apartment location (?location=city).",
+        "description": "Returns all rooms belonging to a user. Optionally filter by apartment (?apartment=apartment_id)",
         "parameters": [
           {
             "name": "user_id",
@@ -1012,15 +1012,6 @@
             "required": false,
             "in": "query",
             "description": "Filter by apartment ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "location",
-            "required": false,
-            "in": "query",
-            "description": "Filter by apartment location (e.g., Oulu)",
             "schema": {
               "type": "string"
             }
@@ -2158,11 +2149,6 @@
             "example": "Living Room",
             "description": "Name of the room"
           },
-          "location": {
-            "type": "string",
-            "example": "First Floor",
-            "description": "Location of the room"
-          },
           "apartmentId": {
             "type": "string",
             "example": "apt-111",
@@ -2172,7 +2158,6 @@
         "required": [
           "id",
           "name",
-          "location",
           "apartmentId"
         ]
       },
@@ -2183,16 +2168,10 @@
             "type": "string",
             "example": "Kitchen",
             "description": "Name of the room"
-          },
-          "location": {
-            "type": "string",
-            "example": "Basement",
-            "description": "Location of the room"
           }
         },
         "required": [
-          "name",
-          "location"
+          "name"
         ]
       },
       "UpdateRoomDto": {
@@ -2201,10 +2180,6 @@
           "name": {
             "type": "string",
             "example": "Master Bedroom"
-          },
-          "location": {
-            "type": "string",
-            "example": "Second Floor"
           }
         }
       },

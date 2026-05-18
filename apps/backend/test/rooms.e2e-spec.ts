@@ -47,7 +47,7 @@ describe('Rooms (e2e)', () => {
     const res = await request(app.getHttpServer())
       .post(`/api/user/${userId}/rooms?apartment=${apartmentId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Living Room', location: 'First Floor' })
+      .send({ name: 'Living Room' })
 
     expect(res.status).toBe(201)
     expect(res.body.name).toBe('Living Room')
@@ -101,15 +101,6 @@ describe('Rooms (e2e)', () => {
     for (const room of res.body) {
       expect(room.apartmentId).toBe(apartmentId)
     }
-  })
-
-  it('GET /api/user/{user_id}/rooms?location=Oulu - 200: filter by location', async () => {
-    const res = await request(app.getHttpServer())
-      .get(`/api/user/${userId}/rooms?location=Oulu`)
-      .set('Authorization', `Bearer ${token}`)
-
-    expect(res.status).toBe(200)
-    expect(Array.isArray(res.body)).toBe(true)
   })
 
   it('GET /api/user/{user_id}/rooms - 401: unauthorized', async () => {

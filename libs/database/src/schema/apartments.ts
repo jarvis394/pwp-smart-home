@@ -12,7 +12,7 @@ import { rooms } from './rooms'
 export const apartments = pgTable('apartments', {
   id: varchar().default(defaultId).primaryKey().notNull(),
   name: varchar({ length: 256 }).notNull(),
-  location: varchar({ length: 256 }).notNull(),
+  location: varchar({ length: 256 }),
   userId: varchar()
     .notNull()
     .references(() => users.id, {
@@ -20,7 +20,6 @@ export const apartments = pgTable('apartments', {
       onUpdate: 'cascade',
     }),
 })
-
 
 export const apartmentsRelations = relations(apartments, ({ one, many }) => ({
   rooms: many(rooms),

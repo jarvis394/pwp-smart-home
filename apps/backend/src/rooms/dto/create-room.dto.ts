@@ -10,9 +10,4 @@ export class CreateRoomDto {
   @IsString()
   @IsNotEmpty()
   name: string
-
-  @ApiProperty({ example: 'Basement', description: 'Location of the room' })
-  @IsString()
-  @IsNotEmpty()
-  location: string
 }

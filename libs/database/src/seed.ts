@@ -43,7 +43,6 @@ async function main() {
   const [room] = await db
     .insert(rooms)
     .values({
-      location: 'Kitchen',
       name: 'Kitchen',
       apartmentId: apartment!.id,
     })

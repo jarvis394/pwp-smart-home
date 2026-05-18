@@ -12,7 +12,6 @@ import { devices } from './devices'
 export const rooms = pgTable('rooms', {
   id: varchar().default(defaultId).primaryKey().notNull(),
   name: varchar({ length: 256 }).notNull(),
-  location: varchar({ length: 256 }).notNull(),
   apartmentId: varchar()
     .notNull()
     .references(() => apartments.id, {
@@ -20,7 +19,6 @@ export const rooms = pgTable('rooms', {
       onUpdate: 'cascade',
     }),
 })
-
 
 export const roomsRelations = relations(rooms, ({ one, many }) => ({
   devices: many(devices),

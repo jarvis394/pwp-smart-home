@@ -8,6 +8,7 @@ import AddDeviceIllustration from 'src/components/svg/AddDeviceIllustration'
 import { BUTTON_MAX_WIDTH } from 'src/config/constants'
 import { exhaustivnessCheck } from '@smart-home/shared'
 import Input from 'src/components/Input'
+import RoomSelect from 'src/components/RoomSelect'
 import { useAddDeviceMutation } from 'src/api'
 import { useNavigate } from 'react-router-dom'
 import { getRouteByAlias } from 'src/utils/getRoutePath'
@@ -138,6 +139,7 @@ type DeviceDetailsProps = StepPageProps & {
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ newDeviceType }) => {
   const [name, setName] = useState('')
   const [model, setModel] = useState('')
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null)
   const navigate = useNavigate()
   const [addDevice] = useAddDeviceMutation()
   const headerTitle = useMemo(
@@ -159,6 +161,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ newDeviceType }) => {
       type: newDeviceType,
       state: DeviceState.ONLINE,
       capabilities: mockCapabilities,
+      roomId: selectedRoomId ?? undefined,
     }).then(() => {
       navigate(getRouteByAlias('devices').path)
     })
@@ -184,6 +187,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ newDeviceType }) => {
           value={model}
           placeholder="Device model"
         />
+        <RoomSelect value={selectedRoomId} onChange={setSelectedRoomId} />
         <Button onClick={onSubmit}>Add new</Button>
       </Content>
     </>

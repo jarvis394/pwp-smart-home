@@ -101,7 +101,7 @@ const Register: React.FC = () => {
       })
       .catch((error) => {
         showSnackbar(
-          error?.data?.message || error?.message || 'Registration failed',
+          error?.data || error?.message || 'Registration failed',
           'error'
         )
         return reject()
