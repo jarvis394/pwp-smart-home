@@ -1,4 +1,6 @@
+export * from './Apartment'
 export * from './Device'
+export * from './Room'
 export * from './Scenario'
 export * from './User'
 export * from './Error'

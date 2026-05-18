@@ -33,6 +33,20 @@ import {
   ScenarioSetStateReq,
   ScenarioDeleteRes,
   ScenarioDeleteReq,
+  ApartmentsGetRes,
+  ApartmentsGetReq,
+  ApartmentGetRes,
+  ApartmentGetReq,
+  ApartmentCreateRes,
+  ApartmentCreateReq,
+  ApartmentUpdateRes,
+  ApartmentUpdateReq,
+  ApartmentDeleteRes,
+  ApartmentDeleteReq,
+  RoomsGetRes,
+  RoomsGetReq,
+  RoomCreateRes,
+  RoomCreateReq,
 } from '@smart-home/shared'
 import { createApi } from '@reduxjs/toolkit/query/react'
 import baseQuery from './customFetchBase'
@@ -42,10 +56,12 @@ import {
   setUserAvatar,
   logout,
 } from 'src/store/auth'
+import { setCurrentApartmentId } from 'src/store/apartment'
+import { RootState } from '../store'
 
 export const apiSlice = createApi({
   baseQuery,
-  tagTypes: ['Device', 'User', 'Favorites', 'Scenario'],
+  tagTypes: ['Device', 'User', 'Favorites', 'Scenario', 'Apartment', 'Room'],
   endpoints: (builder) => ({
     register: builder.mutation<UserRegisterRes, UserRegisterReq>({
       query: (body) => ({
@@ -254,6 +270,86 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['Scenario'],
     }),
+    getApartments: builder.query<ApartmentsGetRes, ApartmentsGetReq>({
+      query: () => ({
+        url: '/apartments',
+        method: 'GET',
+      }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled, getState }) {
+        try {
+          const { data } = await queryFulfilled
+          const state = getState() as RootState
+          const currentId = state.apartment.currentApartmentId
+          if (data && data.length > 0 && !currentId) {
+            dispatch(setCurrentApartmentId(data[0]?.id || null))
+          }
+        } catch {
+          // Ignore as RTK Query will handle the error
+        }
+      },
+      providesTags: (result = []) => [
+        'Apartment',
+        ...result.map((apartment) => ({
+          type: 'Apartment' as const,
+          id: apartment.id,
+        })),
+      ],
+    }),
+    getApartment: builder.query<ApartmentGetRes, ApartmentGetReq>({
+      query: ({ id }) => ({
+        url: `/apartments/${id}`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error, arg) => [
+        { type: 'Apartment', id: arg.id },
+      ],
+    }),
+    createApartment: builder.mutation<ApartmentCreateRes, ApartmentCreateReq>({
+      query: (body) => ({
+        url: '/apartments',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Apartment'],
+    }),
+    updateApartment: builder.mutation<ApartmentUpdateRes, ApartmentUpdateReq>({
+      query: ({ id, body }) => ({
+        url: `/apartments/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: 'Apartment', id: arg.id },
+      ],
+    }),
+    deleteApartment: builder.mutation<ApartmentDeleteRes, ApartmentDeleteReq>({
+      query: ({ id }) => ({
+        url: `/apartments/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Apartment'],
+    }),
+    getRooms: builder.query<RoomsGetRes, RoomsGetReq>({
+      query: () => ({
+        url: '/rooms',
+        method: 'GET',
+      }),
+      providesTags: (result = []) => [
+        'Room',
+        ...result.map((room) => ({
+          type: 'Room' as const,
+          id: room.id,
+        })),
+      ],
+    }),
+    createRoom: builder.mutation<RoomCreateRes, RoomCreateReq>({
+      query: ({ apartmentId, ...body }) => ({
+        url: `/rooms?apartment=${apartmentId}`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Room'],
+    }),
   }),
 })
 
@@ -277,4 +373,11 @@ export const {
   useUpdateScenarioMutation,
   useSetScenarioStateMutation,
   useDeleteScenarioMutation,
+  useGetApartmentsQuery,
+  useGetApartmentQuery,
+  useCreateApartmentMutation,
+  useUpdateApartmentMutation,
+  useDeleteApartmentMutation,
+  useGetRoomsQuery,
+  useCreateRoomMutation,
 } = apiSlice

@@ -45,6 +45,14 @@ describe('Auth (e2e)', () => {
     expect(res.body).toHaveProperty('tokens')
     expect(res.body).toHaveProperty('user')
     expect(res.body.user.email).toBe('authtest@test.com')
+
+    const db = app.get<Database>(DrizzleAsyncProvider)
+    const apartmentsList = await db.query.apartments.findMany({
+      where: (fields, { eq }) => eq(fields.userId, res.body.user.id),
+    })
+    expect(apartmentsList.length).toBe(1)
+    expect(apartmentsList[0]?.name).toBe('Home')
+    expect(apartmentsList[0]?.location).toBeNull()
   })
 
   it('POST /api/auth/register - 400: invalid email', async () => {

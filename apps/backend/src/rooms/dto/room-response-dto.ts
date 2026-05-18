@@ -20,11 +20,6 @@ export class Room {
   @IsNotEmpty()
   name: string
 
-  @ApiProperty({ example: 'First Floor', description: 'Location of the room' })
-  @IsString()
-  @IsNotEmpty()
-  location: string
-
   @ApiProperty({
     example: 'apt-111',
     description: 'Unique identifier for apartment assigned',

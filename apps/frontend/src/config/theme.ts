@@ -35,6 +35,12 @@ declare module '@mui/material/TextField' {
   }
 }
 
+declare module '@mui/material/Radio' {
+  interface RadioPropsColorOverrides {
+    primaryVibrant: true
+  }
+}
+
 export const lightTheme = createTheme({
   palette: {
     mode: 'light',

@@ -44,7 +44,7 @@ const Content = styled('div')(({ theme }) => ({
 
 const SectionTitle = styled('h3')(({ theme }) => ({
   margin: 0,
-  fontWeight: 600,
+  fontWeight: 500,
   fontSize: 15,
   color: theme.palette.text.secondary,
   width: '100%',
@@ -259,6 +259,9 @@ const Settings: React.FC = () => {
             {isLoading && <CircularProgress color="inherit" size={16} />}
             Save
           </Button>
+        </Section>
+        <Section>
+          <SectionTitle>Danger zone</SectionTitle>
           <Button
             disabled={isDeleting}
             variant="error"

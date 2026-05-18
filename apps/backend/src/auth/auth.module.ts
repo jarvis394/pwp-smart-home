@@ -16,12 +16,14 @@ import { ConfigModule } from '../config/config.module'
 import { JwtRefreshTokenStrategy } from './strategies/jwtRefreshToken.strategy'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { DrizzleModule } from '../db/drizzle.module'
+import { ApartmentsModule } from '../apartments/apartments.module'
 
 @Module({
   imports: [
     DrizzleModule,
     UserModule,
     PassportModule,
+    ApartmentsModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       imports: [ConfigModule],

@@ -21,6 +21,7 @@ export type RouteAlias =
   | 'deviceControls'
   | 'scenarios'
   | 'scenarioDetails'
+  | 'homeSettings'
   | 'login'
   | 'register'
 
@@ -40,6 +41,7 @@ const Settings = lazy(() => import('src/pages/Settings'))
 const Register = lazy(() => import('src/pages/Register'))
 const Scenarios = lazy(() => import('src/pages/Scenarios'))
 const ScenarioDetails = lazy(() => import('src/pages/ScenarioDetails'))
+const HomeSettings = lazy(() => import('src/pages/HomeSettings'))
 
 const LazyFavorites = withSuspense(Favorites)
 const LazyDevices = withSuspense(Devices)
@@ -49,6 +51,7 @@ const LazySettings = withSuspense(Settings)
 const LazyRegister = withSuspense(Register)
 const LazyScenarios = withSuspense(Scenarios)
 const LazyScenarioDetails = withSuspense(ScenarioDetails)
+const LazyHomeSettings = withSuspense(HomeSettings)
 
 export const routes: {
   [Alias in RouteAlias]: Route<Alias>
@@ -99,6 +102,13 @@ export const routes: {
     alias: 'scenarioDetails',
     path: '/scenarios/:id',
     element: <LazyScenarioDetails />,
+    withBottomNavigation: false,
+    withFixedAppBar: true,
+  },
+  homeSettings: {
+    alias: 'homeSettings',
+    path: '/home/:id',
+    element: <LazyHomeSettings />,
     withBottomNavigation: false,
     withFixedAppBar: true,
   },

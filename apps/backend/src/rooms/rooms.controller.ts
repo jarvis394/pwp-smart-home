@@ -15,6 +15,7 @@ import {
   Put,
   Query,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Cache } from 'cache-manager'
@@ -54,11 +55,6 @@ export class RoomsController {
     required: false,
     description: 'Filter by apartment ID',
   })
-  @ApiQuery({
-    name: 'location',
-    required: false,
-    description: 'Filter by apartment location (e.g., Oulu)',
-  })
   @ApiResponse({
     status: 200,
     description: 'List of rooms',
@@ -77,18 +73,16 @@ export class RoomsController {
    */
   async getRooms(
     @Param('user_id') userId: string,
-    @Query('apartment') apartmentId?: string,
-    @Query('location') location?: string
+    @Query('apartment') apartmentId?: string
   ) {
     const cacheKey = `rooms-${userId}${
       apartmentId ? `-apt-${apartmentId}` : ''
-    }${location ? `-loc-${location}` : ''}`
+    }`
     const cached = await this.cacheManager.get<Room[]>(cacheKey)
     if (cached) return cached
 
     const rooms = await this.roomsService.getRooms(userId, {
       apartmentId,
-      location,
     })
     await this.cacheManager.set(cacheKey, rooms)
     const trackingKey = `cache-keys-${userId}`
@@ -157,6 +151,10 @@ export class RoomsController {
     @Query('apartment') apartmentId: string,
     @Body() body: CreateRoomDto
   ) {
+    if (!apartmentId) {
+      throw new BadRequestException('Missing required apartment query')
+    }
+
     const room = await this.roomsService.create(userId, apartmentId, body)
     await this.invalidateRoomCaches(userId)
     return room

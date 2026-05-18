@@ -54,15 +54,12 @@ export class RoomsService {
    */
   async getRooms(
     userId: string,
-    filters?: { apartmentId?: string; location?: string }
+    filters?: { apartmentId?: string }
   ): Promise<Room[]> {
     const conditions = []
 
     if (filters?.apartmentId) {
       conditions.push(eq(rooms.apartmentId, filters.apartmentId))
-    }
-    if (filters?.location) {
-      conditions.push(eq(apartments.location, filters.location))
     }
 
     const baseCondition = eq(apartments.userId, userId)
@@ -74,7 +71,6 @@ export class RoomsService {
       .select({
         id: rooms.id,
         name: rooms.name,
-        location: rooms.location,
         apartmentId: rooms.apartmentId,
       })
       .from(rooms)

@@ -8,9 +8,10 @@ import {
   Inject,
   NotFoundException,
   InternalServerErrorException,
+  ForbiddenException,
 } from '@nestjs/common'
 import { Database, DrizzleAsyncProvider } from '../db/drizzle.module'
-import { eq, and } from '@smart-home/db'
+import { and, eq } from '@smart-home/db'
 import { Apartment, NewApartment, apartments } from '@smart-home/db/schema'
 
 @Injectable()
@@ -42,10 +43,12 @@ export class ApartmentsService {
    */
   async getById(userId: string, id: string): Promise<Apartment> {
     const apartment = await this.db.query.apartments.findFirst({
-      where: (fields, { eq, and }) =>
-        and(eq(fields.id, id), eq(fields.userId, userId)),
+      where: (fields, { eq }) => eq(fields.id, id),
     })
     if (!apartment) throw new NotFoundException('Apartment not found')
+    if (apartment.userId !== userId) {
+      throw new ForbiddenException('Apartment does not belong to this user')
+    }
     return apartment
   }
 
@@ -85,13 +88,22 @@ export class ApartmentsService {
     id: string,
     data: Partial<Omit<NewApartment, 'userId'>>
   ): Promise<Apartment> {
+    const apartment = await this.db.query.apartments.findFirst({
+      where: (fields, { eq }) => eq(fields.id, id),
+    })
+    if (!apartment) throw new NotFoundException('Apartment not found')
+    if (apartment.userId !== userId) {
+      throw new ForbiddenException('Apartment does not belong to this user')
+    }
+
     const [result] = await this.db
       .update(apartments)
       .set(data)
       .where(and(eq(apartments.id, id), eq(apartments.userId, userId)))
       .returning()
 
-    if (!result) throw new InternalServerErrorException('Apartment not found')
+    if (!result)
+      throw new InternalServerErrorException('Failed to update apartment')
     return result
   }
 
@@ -104,12 +116,15 @@ export class ApartmentsService {
    * @returns {Promise<boolean>} - Confirmation if apartment was deleted, otherwise Not Found
    */
   async delete(userId: string, id: string): Promise<boolean> {
-    const [result] = await this.db
-      .delete(apartments)
-      .where(and(eq(apartments.id, id), eq(apartments.userId, userId)))
-      .returning()
+    const apartment = await this.db.query.apartments.findFirst({
+      where: (fields, { eq }) => eq(fields.id, id),
+    })
+    if (!apartment) throw new NotFoundException('Apartment not found')
+    if (apartment.userId !== userId) {
+      throw new ForbiddenException('Apartment does not belong to this user')
+    }
 
-    if (!result) throw new NotFoundException('Apartment not found')
+    await this.db.delete(apartments).where(eq(apartments.id, id))
     return true
   }
 }

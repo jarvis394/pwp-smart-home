@@ -19,9 +19,11 @@ import {
   useToggleFavoriteDeviceMutation,
   useGetDevicesQuery,
   useDeleteDeviceMutation,
+  useUpdateDeviceMutation,
 } from 'src/api'
 import FullScreenSpinner from 'src/components/FullScreenSpinner'
 import { DeleteOutlined, Favorite, FavoriteBorder } from '@mui/icons-material'
+import RoomSelect from 'src/components/RoomSelect'
 
 const Root = styled('div')(({ theme }) => ({
   padding: theme.spacing(1, 2),
@@ -72,6 +74,7 @@ const DeviceControls: React.FC = () => {
   const [isConfirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false)
   const [favoriteToggle] = useToggleFavoriteDeviceMutation()
   const [deleteDevice] = useDeleteDeviceMutation()
+  const [updateDevice] = useUpdateDeviceMutation()
   const navigate = useNavigate()
   const { id } = useParams<DeviceControlsPageParams>()
   const { data: devices, isSuccess } = useGetDevicesQuery({})
@@ -170,6 +173,14 @@ const DeviceControls: React.FC = () => {
         />
         {supportsColorSettings && <ColorSetting device={device} />}
         {supportsOnOff && <OnOff device={device} />}
+        <RoomSelect
+          value={device.roomId || null}
+          onChange={(roomId) => {
+            if (id) {
+              updateDevice({ id, body: { roomId: roomId ?? undefined } })
+            }
+          }}
+        />
       </Root>
     </>
   )

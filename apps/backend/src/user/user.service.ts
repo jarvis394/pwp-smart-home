@@ -29,6 +29,7 @@ import { Database, DrizzleAsyncProvider } from '../db/drizzle.module'
 import { eq } from '@smart-home/db'
 import { NewUser, User, users } from '@smart-home/db/schema'
 import fs from 'fs/promises'
+import { ApartmentsService } from '../apartments/apartments.service'
 
 @Injectable()
 export class UserService {
@@ -37,7 +38,8 @@ export class UserService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: Database,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private apartmentsService: ApartmentsService
   ) {}
 
   serializeUser(user: User): ApiUser {
@@ -190,6 +192,12 @@ export class UserService {
     if (!result) {
       throw new InternalServerErrorException('Did not insert new user')
     }
+
+    // Create a default home named "Home" with empty location using ApartmentsService
+    await this.apartmentsService.create(result.id, {
+      name: 'Home',
+      location: null,
+    })
 
     return result
   }

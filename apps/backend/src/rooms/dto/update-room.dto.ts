@@ -10,9 +10,4 @@ export class UpdateRoomDto {
   @IsString()
   @IsOptional()
   name?: string
-
-  @ApiProperty({ example: 'Second Floor', required: false })
-  @IsString()
-  @IsOptional()
-  location?: string
 }
