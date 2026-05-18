@@ -193,11 +193,16 @@ export class UserService {
       throw new InternalServerErrorException('Did not insert new user')
     }
 
-    // Create a default home named "Home" with empty location using ApartmentsService
-    await this.apartmentsService.create(result.id, {
-      name: 'Home',
-      location: null,
-    })
+    // Create a default home named "Home" with empty location
+    try {
+      await this.apartmentsService.create(result.id, {
+        name: 'Home',
+        location: null,
+      })
+    } catch (err) {
+      await this.db.delete(users).where(eq(users.id, result.id))
+      throw err
+    }
 
     return result
   }

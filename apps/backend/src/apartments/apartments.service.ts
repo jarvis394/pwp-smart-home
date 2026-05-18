@@ -124,7 +124,12 @@ export class ApartmentsService {
       throw new ForbiddenException('Apartment does not belong to this user')
     }
 
-    await this.db.delete(apartments).where(eq(apartments.id, id))
+    const [result] = await this.db
+      .delete(apartments)
+      .where(and(eq(apartments.id, id), eq(apartments.userId, userId)))
+      .returning()
+    if (!result) throw new NotFoundException('Apartment not found')
+
     return true
   }
 }

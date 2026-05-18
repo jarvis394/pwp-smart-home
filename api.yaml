@@ -997,7 +997,7 @@
       "get": {
         "operationId": "RoomsController_getRooms",
         "summary": "List rooms of a user",
-        "description": "Returns all rooms belonging to a user. Optionally filter by apartment (?apartment=apartment_id) and/or apartment location (?location=city).",
+        "description": "Returns all rooms belonging to a user. Optionally filter by apartment (?apartment=apartment_id)",
         "parameters": [
           {
             "name": "user_id",

@@ -100,7 +100,7 @@ export type DeviceCapabilityByType<T extends DeviceCapabilityType> = Extract<
 export interface BasicDevice {
   id: string
   userId: string
-  roomId?: string
+  roomId?: string | null
   name: string
   state: DeviceState
   model: string

@@ -212,7 +212,13 @@ const Devices: React.FC = () => {
     setActiveFilterDeviceTypes(new Set(activeTabs))
   }
 
-  if (isSuccess && !isRoomsLoading && filteredDevicesByApartment.length === 0) {
+  if (
+    isSuccess &&
+    !isRoomsLoading &&
+    !query &&
+    activeFilterDeviceTypes.size === 0 &&
+    filteredDevicesByApartment.length === 0
+  ) {
     return (
       <>
         {appBar}

@@ -327,7 +327,7 @@ export const apiSlice = createApi({
         url: `/apartments/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Apartment'],
+      invalidatesTags: ['Apartment', 'Room'],
     }),
     getRooms: builder.query<RoomsGetRes, RoomsGetReq>({
       query: () => ({

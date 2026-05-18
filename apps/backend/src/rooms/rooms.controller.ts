@@ -48,7 +48,7 @@ export class RoomsController {
   @ApiOperation({
     summary: 'List rooms of a user',
     description:
-      'Returns all rooms belonging to a user. Optionally filter by apartment (?apartment=apartment_id) and/or apartment location (?location=city).',
+      'Returns all rooms belonging to a user. Optionally filter by apartment (?apartment=apartment_id)',
   })
   @ApiQuery({
     name: 'apartment',

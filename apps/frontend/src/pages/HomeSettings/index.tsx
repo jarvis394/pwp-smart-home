@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   styled,
   Dialog,
@@ -23,6 +23,7 @@ import {
   useDeleteApartmentMutation,
   useGetDevicesQuery,
   useGetApartmentsQuery,
+  useGetRoomsQuery,
 } from 'src/api'
 import { useNavigate, useParams } from 'react-router'
 import FullScreenSpinner from 'src/components/FullScreenSpinner'
@@ -104,6 +105,7 @@ const HomeSettings: React.FC = () => {
   const { data: apartment, isLoading: isApartmentLoading } =
     useGetApartmentQuery({ id }, { skip: !id })
   const { data: devicesData } = useGetDevicesQuery({})
+  const { data: roomsData = [] } = useGetRoomsQuery({})
   const [updateApartment, { isLoading: isUpdating }] =
     useUpdateApartmentMutation()
   const [deleteApartment, { isLoading: isDeleting }] =
@@ -117,7 +119,16 @@ const HomeSettings: React.FC = () => {
   const $nameInput = React.useRef<HTMLInputElement>(null)
   const $addressInput = React.useRef<HTMLInputElement>(null)
 
-  const deviceCount = devicesData?.devices?.length ?? 0
+  const deviceCount = useMemo(() => {
+    if (!devicesData?.devices) return 0
+    const currentRoomIds = new Set(
+      roomsData.filter((r) => r.apartmentId === id).map((r) => r.id)
+    )
+    return devicesData.devices.filter(
+      (d) => !d.roomId || currentRoomIds.has(d.roomId)
+    ).length
+  }, [devicesData?.devices, roomsData, id])
+
   const canDeleteHome = apartments.length > 1
 
   const handleUpdateName = () => {

@@ -177,7 +177,7 @@ const DeviceControls: React.FC = () => {
           value={device.roomId || null}
           onChange={(roomId) => {
             if (id) {
-              updateDevice({ id, body: { roomId: roomId ?? undefined } })
+              updateDevice({ id, body: { roomId } })
             }
           }}
         />

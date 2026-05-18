@@ -58,8 +58,9 @@ export class UpdateDeviceDto {
 
   @ApiPropertyOptional({
     description: 'Move device to a different room (UUID)',
+    nullable: true,
   })
   @IsOptional()
   @IsUUID()
-  roomId?: string
+  roomId?: string | null
 }
