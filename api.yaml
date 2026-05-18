@@ -1986,8 +1986,9 @@
             "example": 0
           },
           "roomId": {
-            "type": "string",
-            "description": "Move device to a different room (UUID)"
+            "type": "object",
+            "description": "Move device to a different room (UUID)",
+            "nullable": true
           }
         }
       },
